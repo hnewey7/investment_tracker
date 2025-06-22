@@ -10,7 +10,7 @@ from typing import Generator
 
 from sqlmodel import Session, create_engine
 
-from app.core.db import engine, create_db_and_tables
+from app.core.db import engine, create_db_and_tables, clear_db
 from app.core.config import test_settings
 
 # - - - - - - - - - - - - - - - - - - -
@@ -18,5 +18,8 @@ from app.core.config import test_settings
 @pytest.fixture(scope="session",autouse=True)
 def db() -> Generator[Session, None, None]:
     with Session(engine) as session:
+        # Clear previous tables.
+        clear_db()
+        # Create database with new tables.
         create_db_and_tables()
         yield session

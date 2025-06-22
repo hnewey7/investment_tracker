@@ -26,3 +26,9 @@ def create_db_and_tables():
     """
     SQLModel.metadata.create_all(engine)
 
+
+def clear_db():
+    """
+    Clear all previous tables in database.
+    """
+    SQLModel.metadata.drop_all(engine)
