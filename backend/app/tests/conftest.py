@@ -9,7 +9,9 @@ import pytest
 from typing import Generator
 
 from sqlmodel import Session, create_engine
+from fastapi.testclient import TestClient
 
+from app.main import app
 from app.core.db import engine, create_db_and_tables, clear_db
 from app.core.config import test_settings
 
@@ -23,3 +25,9 @@ def db() -> Generator[Session, None, None]:
         # Create database with new tables.
         create_db_and_tables()
         yield session
+
+
+@pytest.fixture(scope="module")
+def client() -> Generator[TestClient, None, None]:
+    with TestClient(app) as c:
+        yield c
