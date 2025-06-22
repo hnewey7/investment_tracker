@@ -5,13 +5,18 @@ Created on 21-06-2025
 @author: Harry New
 
 '''
+import sys
+
 from sqlmodel import create_engine,SQLModel
 
-from core.config import settings
+from app.core.config import settings, test_settings
 
 # - - - - - - - - - - - - - - - - - - -
 
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI),echo=True)
+if "pytest" in sys.modules:
+    engine = create_engine(str(test_settings.SQLALCHEMY_DATABASE_URI))
+else:
+    engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
 # - - - - - - - - - - - - - - - - - - -
 
