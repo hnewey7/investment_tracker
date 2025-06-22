@@ -14,7 +14,6 @@ from sqlmodel import SQLModel, Field, Relationship
 
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
-    is_active: bool = True
     username: str | None = Field(default=None, max_length=255)
 
 
