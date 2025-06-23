@@ -1,3 +1,3 @@
-# Investment Tracker
+# Investment Tracker Backend
 
-Full-stack web application for tracking personal investments.
+Backend API for the investment tracker web app.
