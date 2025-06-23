@@ -7,7 +7,7 @@ Created on  21-06-2025
 '''
 import logging
 
-from core.db import engine, create_db_and_tables
+from app.core.db import engine, create_db_and_tables
 import models
 
 # - - - - - - - - - - - - - - - - - - -

@@ -5,24 +5,19 @@ Created on 21-06-2025
 @author: Harry New
 
 '''
-from dotenv import load_dotenv
-import os
-
 from pydantic import PostgresDsn, computed_field
 from pydantic_core import MultiHostUrl
-from pydantic_settings import BaseSettings
-
-# - - - - - - - - - - - - - - - - - - -
-# Load secret values.
-
-load_dotenv()
-SECRET_POSTGRES_SERVER = os.getenv("POSTGRES_SERVER")
-SECRET_POSTGRES_USER = os.getenv("POSTGRES_USER")
-SECRET_POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # - - - - - - - - - - - - - - - - - - -
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+        
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
@@ -44,16 +39,10 @@ class Settings(BaseSettings):
 # - - - - - - - - - - - - - - - - - - -
 
 settings = Settings(
-    POSTGRES_SERVER=SECRET_POSTGRES_SERVER,
-    POSTGRES_USER=SECRET_POSTGRES_USER,
-    POSTGRES_PASSWORD=SECRET_POSTGRES_PASSWORD,
     POSTGRES_DB="investment_tracker"
 )
 
 # Settings configured for test setup.
 test_settings = Settings(
-    POSTGRES_SERVER=SECRET_POSTGRES_SERVER,
-    POSTGRES_USER=SECRET_POSTGRES_USER,
-    POSTGRES_PASSWORD=SECRET_POSTGRES_PASSWORD,
     POSTGRES_DB="investment_tracker_test"
 )
