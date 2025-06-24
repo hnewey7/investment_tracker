@@ -5,25 +5,45 @@ Created on 21-06-2025
 @author: Harry New
 
 '''
-import uuid
-
 from pydantic import EmailStr
 from sqlmodel import SQLModel, Field, Relationship
 
 # - - - - - - - - - - - - - - - - - - -
 
 class UserBase(SQLModel):
+    username: str = Field(unique=True, max_length=255)
     email: EmailStr = Field(unique=True, index=True, max_length=255)
-    username: str | None = Field(default=None, max_length=255)
+    hashed_password: str
 
+class User(UserBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    portfolio: "Portfolio" = Relationship(back_populates="user")
 
 class UserCreate(UserBase):
     password: str = Field(min_length=8, max_length=40)
 
-
-class User(UserBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    hashed_password: str
-
 class UserPublic(UserBase):
-    id: uuid.UUID
+    id: int
+
+# - - - - - - - - - - - - - - - - - - -
+
+class PortfolioBase(SQLModel):
+    type: str
+
+class Portfolio(PortfolioBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user: User = Relationship(back_populates="portfolio")
+    assets: list["Asset"] = Relationship(back_populates="portfolio")
+    previous_trades: list["PreviousTrade"] = Relationship(back_populates="portfolio")
+
+# - - - - - - - - - - - - - - - - - - -
+
+class Asset(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    portfolio: Portfolio = Relationship(back_populates="assets")
+
+# - - - - - - - - - - - - - - - - - - -
+
+class PreviousTrade(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    portfolio: Portfolio = Relationship(back_populates="previous_trades")
