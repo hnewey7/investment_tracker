@@ -7,12 +7,13 @@ Created on 24-06-2025
 '''
 from sqlmodel import Session, select
 
-from app.models import UserCreate, User
+from app.models import UserCreate, User, Portfolio
 from app import crud
 from app.tests.utils.utils import random_email, random_lower_string
 from app.core.security import verify_password
 
 # - - - - - - - - - - - - - - - - - - -
+# USER TESTS.
 
 def test_create_user(db: Session):
     """
@@ -43,10 +44,44 @@ def test_create_user(db: Session):
             assert verify_password(properties[key],db_obj.__dict__["hashed_password"])
     
     # Check db generated properties.
-    assert db_obj.id == 1
     assert db_obj.portfolio is None
 
     # Check object in database.
     statement = select(User).where(User.username == properties["username"])
     result = db.exec(statement).one()
-    assert result.id == 1
+    assert result.id == db_obj.id
+
+# - - - - - - - - - - - - - - - - - - -
+# PORTFOLIO TESTS.
+
+def test_create_portfolio(db: Session):
+    """
+    Test creating portfolio.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "username": random_lower_string(),
+        "email": random_email(),
+        "password": random_lower_string()
+    }
+
+    # Create user.
+    user_create = UserCreate(**properties)
+    user = crud.create_user(session=db,user_create=user_create)
+
+    # Create portfolio.
+    db_obj = crud.create_portfolio(session=db,user=user)
+
+    # Check properties.
+    assert db_obj.user_id == user.id
+    assert db_obj.user == user
+
+    # TODO: Check properties for assets and previous trades.
+
+    # Check object in database.
+    statement = select(Portfolio).where(Portfolio.user == user)
+    result = db.exec(statement).one()
+    assert result.id == db_obj.id
