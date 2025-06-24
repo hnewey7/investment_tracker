@@ -46,3 +46,9 @@ settings = Settings(
 test_settings = Settings(
     POSTGRES_DB="investment_tracker_test"
 )
+
+# Settings configured for docker setup.
+docker_settings = Settings(
+    POSTGRES_SERVER="host.docker.internal",
+    POSTGRES_DB="investment_tracker"
+)

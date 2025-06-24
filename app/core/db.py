@@ -6,15 +6,22 @@ Created on 21-06-2025
 
 '''
 import sys
+import os
 
 from sqlmodel import create_engine,SQLModel
 
-from app.core.config import settings, test_settings
+if __name__ == "core.db":
+    from core.config import settings, test_settings
+else:
+    from app.core.config import settings, test_settings, docker_settings
 
 # - - - - - - - - - - - - - - - - - - -
+# Selecting configuration settings.
 
 if "pytest" in sys.modules:
     engine = create_engine(str(test_settings.SQLALCHEMY_DATABASE_URI))
+elif os.path.exists('/.dockerenv'):
+    engine = create_engine(str(docker_settings.SQLALCHEMY_DATABASE_URI))
 else:
     engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 

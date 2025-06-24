@@ -7,7 +7,15 @@ Created on  21-06-2025
 '''
 import logging
 
-from app.core.db import engine, create_db_and_tables
+from sqlmodel import SQLModel
+
+# - - - - - - - - - - - - - - - - - - -
+
+if __name__ == "__main__":
+    from core.db import engine, create_db_and_tables
+else:
+    from app.core.db import engine, create_db_and_tables
+
 import models
 
 # - - - - - - - - - - - - - - - - - - -
@@ -24,8 +32,18 @@ def init() -> None:
     # Create database.
     create_db_and_tables()
 
+def clear_db_and_tables():
+    """
+    Clearing database.
+    """
+    # Clear database.
+    SQLModel.metadata.drop_all()
+
+# - - - - - - - - - - - - - - - - - - -
 
 def main():
+    logger.info("Clear database.")
+    clear_db_and_tables
     logger.info("Creating initial database.")
     create_db_and_tables()
     logger.info("Initial database created successfully.")
