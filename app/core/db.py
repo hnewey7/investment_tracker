@@ -8,7 +8,7 @@ Created on 21-06-2025
 import sys
 import os
 
-from sqlmodel import create_engine,SQLModel
+from sqlmodel import create_engine, SQLModel, Session, MetaData
 
 if __name__ == "core.db":
     from core.config import settings, test_settings
@@ -38,4 +38,7 @@ def clear_db():
     """
     Clear all previous tables in database.
     """
-    SQLModel.metadata.drop_all(engine)
+    # Clear individual tables.
+    metadata = MetaData()
+    metadata.reflect(bind=engine)
+    metadata.drop_all(bind=engine)
