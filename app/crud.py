@@ -7,7 +7,7 @@ Created on 22-06-2025
 '''
 from sqlmodel import Session, select
 
-from app.models import User, UserCreate
+from app.models import User, UserCreate, Portfolio
 from app.core.security import get_password_hash, verify_password
 
 # - - - - - - - - - - - - - - - - - - -
@@ -66,3 +66,22 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     if not verify_password(password, db_user.hashed_password):
         return None
     return db_user
+
+# - - - - - - - - - - - - - - - - - - -
+
+def create_portfolio(*, session: Session, user: User):
+    """
+    Creating portfolio for user.
+
+    Args:
+        session (Session): SQL session.
+        user (User): User to assign portfolio.
+    """
+    db_obj = Portfolio(
+        type="Overview",
+        user=user
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
