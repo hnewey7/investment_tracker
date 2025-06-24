@@ -36,16 +36,21 @@ class Portfolio(PortfolioBase, table=True):
     user_id: int | None = Field(default=None, foreign_key="user.id")
     user: User = Relationship(back_populates="portfolio")
 
-    assets: list["Asset"] = Relationship(back_populates="portfolio")
     previous_trades: list["PreviousTrade"] = Relationship(back_populates="portfolio")
 
 # - - - - - - - - - - - - - - - - - - -
 
-class Asset(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class InstrumentBase(SQLModel):
+    name: str = Field(max_length=255)
+    exchange: str = Field(max_length=255)
+    symbol: str = Field(index=True,max_length=255)
+    open: float | None
+    high: float | None
+    low: float | None
+    close: float | None
 
-    portfolio_id: int | None = Field(default=None, foreign_key="portfolio.id")
-    portfolio: Portfolio = Relationship(back_populates="assets")
+class Instrument(InstrumentBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
 
 # - - - - - - - - - - - - - - - - - - -
 

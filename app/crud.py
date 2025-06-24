@@ -7,7 +7,7 @@ Created on 22-06-2025
 '''
 from sqlmodel import Session, select
 
-from app.models import User, UserCreate, Portfolio
+from app.models import User, UserCreate, Portfolio, Instrument
 from app.core.security import get_password_hash, verify_password
 
 # - - - - - - - - - - - - - - - - - - -
@@ -80,6 +80,27 @@ def create_portfolio(*, session: Session, user: User):
     db_obj = Portfolio(
         type="Overview",
         user=user
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+# - - - - - - - - - - - - - - - - - - -
+
+def create_instrument(*, session: Session, name:str, exchange: str, symbol: str):
+    """
+    Creating instrument.
+
+    Args:
+        session (Session): 
+        exchange (str): Exchange instrument is available on.
+        symbol (str): Symbol.
+    """
+    db_obj = Instrument(
+        name=name,
+        exchange=exchange,
+        symbol=symbol
     )
     session.add(db_obj)
     session.commit()

@@ -7,7 +7,7 @@ Created on 24-06-2025
 '''
 from sqlmodel import Session, select
 
-from app.models import UserCreate, User, Portfolio
+from app.models import UserCreate, User, Portfolio, Instrument
 from app import crud
 from app.tests.utils.utils import random_email, random_lower_string
 from app.core.security import verify_password
@@ -83,5 +83,36 @@ def test_create_portfolio(db: Session):
 
     # Check object in database.
     statement = select(Portfolio).where(Portfolio.user == user)
+    result = db.exec(statement).one()
+    assert result.id == db_obj.id
+
+# - - - - - - - - - - - - - - - - - - -
+# INSTRUMENT TESTS
+
+def test_create_instrument(db: Session):
+    """
+    Test create instrument.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "name":"C&C GROUP ORD EURO.01",
+        "exchange":"LSE",
+        "symbol":"CCR"
+    }
+
+    # Create instrument.
+    db_obj = crud.create_instrument(session=db,**properties)
+    print(db_obj.__dict__)
+
+    # Check properties.
+    assert db_obj.name == properties["name"]
+    assert db_obj.exchange == properties["exchange"]
+    assert db_obj.symbol == properties["symbol"]
+
+    # Check object in database.
+    statement = select(Instrument).where(Instrument.name == properties["name"])
     result = db.exec(statement).one()
     assert result.id == db_obj.id
