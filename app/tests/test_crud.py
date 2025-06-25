@@ -368,7 +368,8 @@ def test_create_instrument(db: Session):
     properties = {
         "name":"C&C GROUP ORD EURO.01",
         "exchange":"LSE",
-        "symbol":"CCR"
+        "symbol":"CCR",
+        "currency":"GBX"
     }
 
     # Create instrument.
@@ -396,7 +397,8 @@ def test_get_instrument_by_symbol(db: Session):
     properties = {
         "name":"C&C GROUP ORD EURO.01",
         "exchange":"LSE",
-        "symbol":"CCR"
+        "symbol":"CCR",
+        "currency":"GBX"
     }
 
     # Create instrument.
@@ -418,7 +420,8 @@ def test_update_instrument_price(db: Session):
     properties = {
         "name":"C&C GROUP ORD EURO.01",
         "exchange":"LSE",
-        "symbol":"CCR"
+        "symbol":"CCR",
+        "currency":"GBX"
     }
 
     # Create instrument.
@@ -440,6 +443,30 @@ def test_update_instrument_price(db: Session):
     assert db_obj.close == update_prices["close"]
 
 
+def test_update_instrument_currency(db: Session):
+    """
+    Test update currency of instrument.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "name":"C&C GROUP ORD EURO.01",
+        "exchange":"LSE",
+        "symbol":"CCR",
+        "currency":"GBX"
+    }
+
+    # Create instrument.
+    instrument = crud.create_instrument(session=db,**properties)
+
+    # Update currency.
+    db_obj = crud.update_currency(session=db,instrument=instrument,currency="GBP")
+    assert db_obj.currency == "GBP"
+    assert db_obj == instrument
+
+
 def test_delete_instrument(db: Session):
     """
     Test deleting instrument.
@@ -451,7 +478,8 @@ def test_delete_instrument(db: Session):
     properties = {
         "name":"C&C GROUP ORD EURO.01",
         "exchange":"LSE",
-        "symbol":"CCR"
+        "symbol":"CCR",
+        "currency":"GBX"
     }
 
     # Create instrument.

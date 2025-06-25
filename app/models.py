@@ -44,6 +44,7 @@ class InstrumentBase(SQLModel):
     name: str = Field(max_length=255)
     exchange: str = Field(max_length=255)
     symbol: str = Field(index=True,max_length=255)
+    currency: str = Field(max_length=5)
     open: float | None
     high: float | None
     low: float | None

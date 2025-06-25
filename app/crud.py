@@ -11,6 +11,7 @@ from app.models import User, UserCreate, Portfolio, Instrument
 from app.core.security import get_password_hash, verify_password
 
 # - - - - - - - - - - - - - - - - - - -
+# USER OPERATIONS
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
     """
@@ -145,6 +146,7 @@ def delete_user(*, session: Session, user: User):
     session.commit()
 
 # - - - - - - - - - - - - - - - - - - -
+# PORTFOLIO OPERATIONS
 
 def create_portfolio(*, session: Session, user: User):
     """
@@ -176,8 +178,9 @@ def delete_portfolio(*, session: Session, portfolio: Portfolio):
     session.commit()
 
 # - - - - - - - - - - - - - - - - - - -
+# INSTRUMENT OPERATIONS
 
-def create_instrument(*, session: Session, name:str, exchange: str, symbol: str):
+def create_instrument(*, session: Session, name:str, exchange: str, symbol: str, currency: str):
     """
     Creating instrument.
 
@@ -189,7 +192,8 @@ def create_instrument(*, session: Session, name:str, exchange: str, symbol: str)
     db_obj = Instrument(
         name=name,
         exchange=exchange,
-        symbol=symbol
+        symbol=symbol,
+        currency=currency
     )
     session.add(db_obj)
     session.commit()
@@ -234,6 +238,24 @@ def update_price(*, session: Session, instrument: Instrument, open: float, high:
     instrument.low = low
     instrument.close = close
     # Commit to db.
+    session.commit()
+    session.refresh(instrument)
+    return instrument
+
+
+def update_currency(*, session: Session, instrument: Instrument, currency: str) -> Instrument:
+    """
+    Update currency of instrument.
+
+    Args:
+        session (Session): SQL session.
+        instrument (Instrument): Instrument to update.
+        currency (str): Currency.
+
+    Returns:
+        Instrument: Updated instrument.
+    """
+    instrument.currency = currency
     session.commit()
     session.refresh(instrument)
     return instrument
