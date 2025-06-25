@@ -195,3 +195,58 @@ def create_instrument(*, session: Session, name:str, exchange: str, symbol: str)
     session.commit()
     session.refresh(db_obj)
     return db_obj
+
+
+def get_instrument_by_symbol(*, session: Session, symbol:str) -> Instrument:
+    """
+    Get instrument by symbol.
+
+    Args:
+        session (Session): SQL session.
+        symbol (str): Symbol.
+
+    Returns:
+        Instrument: Instrument in database.
+    """
+    statement = select(Instrument).where(Instrument.symbol == symbol)
+    session_instrument = session.exec(statement).first()
+    return session_instrument
+
+
+def update_price(*, session: Session, instrument: Instrument, open: float, high: float, low: float, close: float) -> Instrument:
+    """
+    Update price of an instrument.
+
+    Args:
+        session (Session): SQL session.
+        instrument (Instrument): Instrument to update.
+        open (float): Open price.
+        high (float): High price.
+        low (float): Low price.
+        close (float): Close price.
+
+    Returns:
+        Instrument: Updated instrument.
+    """
+    # Update prices.
+    instrument.open = open
+    instrument.high = high
+    instrument.low = low
+    instrument.close = close
+    # Commit to db.
+    session.commit()
+    session.refresh(instrument)
+    return instrument
+
+
+def delete_instrument(*, session: Session, instrument: Instrument):
+    """
+    Delete instrument.
+
+    Args:
+        session (Session): SQL session.
+        instrument (Instrument): Instrument to delete.
+    """
+    # Delete instrument.
+    session.delete(instrument)
+    session.commit()

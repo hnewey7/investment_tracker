@@ -383,3 +383,83 @@ def test_create_instrument(db: Session):
     statement = select(Instrument).where(Instrument.name == properties["name"])
     result = db.exec(statement).one()
     assert result.id == db_obj.id
+
+
+def test_get_instrument_by_symbol(db: Session):
+    """
+    Test get instrument by symbol.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "name":"C&C GROUP ORD EURO.01",
+        "exchange":"LSE",
+        "symbol":"CCR"
+    }
+
+    # Create instrument.
+    instrument = crud.create_instrument(session=db,**properties)
+
+    # Get instrument.
+    db_obj = crud.get_instrument_by_symbol(session=db,symbol=instrument.symbol)
+    assert db_obj == instrument
+
+
+def test_update_instrument_price(db: Session):
+    """
+    Test update instrument price.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "name":"C&C GROUP ORD EURO.01",
+        "exchange":"LSE",
+        "symbol":"CCR"
+    }
+
+    # Create instrument.
+    instrument = crud.create_instrument(session=db,**properties)
+
+    # Update instrument prices.
+    update_prices = {
+        "open": 1,
+        "high": 2,
+        "low": 3,
+        "close": 4
+    }
+    db_obj = crud.update_price(session=db,instrument=instrument,**update_prices)
+
+    # Check prices.
+    assert db_obj.open == update_prices["open"]
+    assert db_obj.high == update_prices["high"]
+    assert db_obj.low == update_prices["low"]
+    assert db_obj.close == update_prices["close"]
+
+
+def test_delete_instrument(db: Session):
+    """
+    Test deleting instrument.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "name":"C&C GROUP ORD EURO.01",
+        "exchange":"LSE",
+        "symbol":"CCR"
+    }
+
+    # Create instrument.
+    instrument = crud.create_instrument(session=db,**properties)
+    db_obj = crud.get_instrument_by_symbol(session=db,symbol=properties["symbol"])
+    assert db_obj == instrument
+
+    # Delete instrument and check.
+    crud.delete_instrument(session=db,instrument=instrument)
+    db_obj = crud.get_instrument_by_symbol(session=db,symbol=properties["symbol"])
+    assert db_obj == None
