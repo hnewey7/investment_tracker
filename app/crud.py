@@ -48,19 +48,41 @@ def get_user_by_email(*, session: Session, email: str) -> User | None:
     return session_user
 
 
-def authenticate(*, session: Session, email: str, password: str) -> User | None:
+def get_user_by_username(*, session: Session, username: str) -> User | None:
+    """
+    Get user by username.
+
+    Args:
+        session (Session): SQL session.
+        username (str): Username to search for.
+
+    Returns:
+        User | None: User model or none.
+    """
+    statement = select(User).where(User.username == username)
+    session_user = session.exec(statement).first()
+    return session_user
+
+
+def authenticate(*, session: Session, email: str = None, username: str = None , password: str) -> User | None:
     """
     Authenticate user.
 
     Args:
         session (Session): SQL session.
-        email (str): Email address.
+        email (str | None): Email address, optional.
+        username (str | None): Username, optional.
         password (str): Password.
 
     Returns:
         User | None: User model or none.
     """
-    db_user = get_user_by_email(session=session, email=email)
+    # Getting user by email or username.
+    if email:
+        db_user = get_user_by_email(session=session, email=email)
+    else:
+        db_user = get_user_by_username(session=session, username=username)
+
     if not db_user:
         return None
     if not verify_password(password, db_user.hashed_password):

@@ -51,6 +51,161 @@ def test_create_user(db: Session):
     result = db.exec(statement).one()
     assert result.id == db_obj.id
 
+
+def test_get_user_by_email(db:Session):
+    """
+    Test get user by email.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "username": random_lower_string(),
+        "email": random_email(),
+        "password": random_lower_string()
+    }
+
+    # Create user.
+    user_create = UserCreate(**properties)
+    user = crud.create_user(session=db,user_create=user_create)
+
+    # Get user by email.
+    db_obj = crud.get_user_by_email(session=db,email=user.email)
+
+    # Check db obj.
+    assert db_obj == user
+
+
+def test_get_user_by_email_none(db:Session):
+    """
+    Test get user by email when no user created.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Get user by email.
+    db_obj = crud.get_user_by_email(session=db,email=random_email())
+
+    # Check db obj.
+    assert db_obj == None
+
+
+def test_get_user_by_username(db:Session):
+    """
+    Test get user by username.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "username": random_lower_string(),
+        "email": random_email(),
+        "password": random_lower_string()
+    }
+
+    # Create user.
+    user_create = UserCreate(**properties)
+    user = crud.create_user(session=db,user_create=user_create)
+
+    # Get user by username.
+    db_obj = crud.get_user_by_username(session=db,username=user.username)
+
+    # Check db obj.
+    assert db_obj == user
+
+
+def test_get_user_by_username_none(db:Session):
+    """
+    Test get user by username when no user created.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Get user by username.
+    db_obj = crud.get_user_by_username(session=db,username=random_lower_string())
+
+    # Check db obj.
+    assert db_obj == None
+
+
+def test_valid_authenticate(db:Session):
+    """
+    Test valid user authenication.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "username": random_lower_string(),
+        "email": random_email(),
+        "password": random_lower_string()
+    }
+
+    # Create user.
+    user_create = UserCreate(**properties)
+    user = crud.create_user(session=db,user_create=user_create)
+
+    # Authenticate user by email.
+    db_obj = crud.authenticate(session=db,email=properties["email"],password=properties["password"])
+    assert db_obj == user
+
+    # Authenticate user by username.
+    db_obj = crud.authenticate(session=db,username=properties["username"],password=properties["password"])
+    assert db_obj == user
+
+
+def test_invalid_authentication(db:Session):
+    """
+    Test invalid user authentication.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "email": random_email(),
+        "password": random_lower_string(),
+        "username":random_lower_string()
+    }
+
+    # Authenticate user by email.
+    db_obj = crud.authenticate(session=db,email=properties["email"],password=properties["password"])
+    assert db_obj == None
+
+    # Authenticate user by username.
+    db_obj = crud.authenticate(session=db,username=properties["username"],password=properties["password"])
+    assert db_obj == None
+
+
+def test_invalid_password_authentication(db:Session):
+    """
+    Test invalid password for user authentication.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "username": random_lower_string(),
+        "email": random_email(),
+        "password": random_lower_string()
+    }
+
+    # Create user.
+    user_create = UserCreate(**properties)
+    user = crud.create_user(session=db,user_create=user_create)
+
+    # Authenticate with invalid password.
+    db_obj = crud.authenticate(session=db,email=properties["email"],password=random_lower_string())
+    assert db_obj == None
+
+    db_obj = crud.authenticate(session=db,username=properties["username"],password=random_lower_string())
+    assert db_obj == None
+
+
 # - - - - - - - - - - - - - - - - - - -
 # PORTFOLIO TESTS.
 
@@ -105,7 +260,6 @@ def test_create_instrument(db: Session):
 
     # Create instrument.
     db_obj = crud.create_instrument(session=db,**properties)
-    print(db_obj.__dict__)
 
     # Check properties.
     assert db_obj.name == properties["name"]
