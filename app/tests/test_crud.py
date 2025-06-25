@@ -262,6 +262,32 @@ def test_change_password(db:Session):
     db_obj = crud.authenticate(session=db,email=properties["email"],password=properties["new_password"])
     assert db_obj == user
 
+
+def test_delete_user(db:Session):
+    """
+    Test delete user.
+
+    Args:
+        db (Session): _description_
+    """
+    # Properties.
+    properties = {
+        "username": random_lower_string(),
+        "email": random_email(),
+        "password": random_lower_string()
+    }
+
+    # Create user.
+    user_create = UserCreate(**properties)
+    user = crud.create_user(session=db,user_create=user_create)
+
+    # Delete user.
+    crud.delete_user(session=db,user=user)
+    
+    # Verify delete.
+    db_obj = crud.get_user_by_email(session=db,email=properties["email"])
+    assert db_obj == None
+
 # - - - - - - - - - - - - - - - - - - -
 # PORTFOLIO TESTS.
 

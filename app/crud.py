@@ -131,6 +131,19 @@ def change_password(*, session: Session, email: str, new_password: str) -> User:
     session.refresh(user)
     return user
 
+
+def delete_user(*, session: Session, user: User):
+    """
+    Delete user.
+
+    Args:
+        session (Session): SQL session.
+        user (User): User to delete.
+    """
+    # Delete user.
+    session.delete(user)
+    session.commit()
+
 # - - - - - - - - - - - - - - - - - - -
 
 def create_portfolio(*, session: Session, user: User):
