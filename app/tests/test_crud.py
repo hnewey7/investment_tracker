@@ -206,6 +206,62 @@ def test_invalid_password_authentication(db:Session):
     assert db_obj == None
 
 
+def test_change_username(db:Session):
+    """
+    Test change username.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "username": random_lower_string(),
+        "new_username": random_lower_string(),
+        "email": random_email(),
+        "password": random_lower_string()
+    }
+
+    # Create user.
+    user_create = UserCreate(**properties)
+    user = crud.create_user(session=db,user_create=user_create)
+
+    # Update username.
+    db_obj = crud.change_username(session=db,email=properties["email"],new_username=properties["new_username"])
+    assert db_obj.username == properties["new_username"]
+
+    # Check database for new user.
+    db_obj = crud.get_user_by_username(session=db, username=properties["new_username"])
+    assert db_obj.username == properties["new_username"]
+
+
+def test_change_password(db:Session):
+    """
+    Test change password.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "username": random_lower_string(),
+        "email": random_email(),
+        "password": random_lower_string(),
+        "new_password": random_lower_string()
+    }
+
+    # Create user.
+    user_create = UserCreate(**properties)
+    user = crud.create_user(session=db,user_create=user_create)
+
+    # Update password.
+    db_obj = crud.change_password(session=db,email=properties["email"],new_password=properties["new_password"])
+    assert verify_password(properties["new_password"],db_obj.hashed_password)
+
+    # Verify authentication.
+    user = crud.get_user_by_email(session=db,email=properties["email"])
+    db_obj = crud.authenticate(session=db,email=properties["email"],password=properties["new_password"])
+    assert db_obj == user
+
 # - - - - - - - - - - - - - - - - - - -
 # PORTFOLIO TESTS.
 

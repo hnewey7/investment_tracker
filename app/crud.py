@@ -89,6 +89,48 @@ def authenticate(*, session: Session, email: str = None, username: str = None , 
         return None
     return db_user
 
+
+def change_username(*, session: Session, email: str, new_username: str) -> User:
+    """
+    Change username.
+
+    Args:
+        session (Session): SQL session.
+        email (str): Email address.
+        new_username (str): New username.
+
+    Returns:
+        User: Updated user model.
+    """
+    # Get user.
+    user = get_user_by_email(session=session, email=email)
+    # Update username.
+    user.username = new_username
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def change_password(*, session: Session, email: str, new_password: str) -> User:
+    """
+    Change password.
+
+    Args:
+        session (Session): SQL session.
+        email (str): Email address.
+        new_password (str): New password.
+
+    Returns:
+        User: Updated User model.
+    """
+    # Get user.
+    user = get_user_by_email(session=session, email=email)
+    # Update username.
+    user.hashed_password = get_password_hash(new_password)
+    session.commit()
+    session.refresh(user)
+    return user
+
 # - - - - - - - - - - - - - - - - - - -
 
 def create_portfolio(*, session: Session, user: User):
