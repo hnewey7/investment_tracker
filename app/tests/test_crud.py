@@ -323,6 +323,37 @@ def test_create_portfolio(db: Session):
     result = db.exec(statement).one()
     assert result.id == db_obj.id
 
+
+def test_delete_portfolio(db: Session):
+    """
+    Test deleting portfolio.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Properties.
+    properties = {
+        "username": random_lower_string(),
+        "email": random_email(),
+        "password": random_lower_string()
+    }
+
+    # Create user.
+    user_create = UserCreate(**properties)
+    user = crud.create_user(session=db,user_create=user_create)
+
+    # Create portfolio.
+    portfolio = crud.create_portfolio(session=db,user=user)
+
+    # Verify portfolio exists.
+    assert user.portfolio == portfolio
+
+    # Delete portfolio.
+    crud.delete_portfolio(session=db,portfolio=portfolio)
+
+    # Verify delete through user.
+    assert user.portfolio == None
+
 # - - - - - - - - - - - - - - - - - - -
 # INSTRUMENT TESTS
 

@@ -155,13 +155,25 @@ def create_portfolio(*, session: Session, user: User):
         user (User): User to assign portfolio.
     """
     db_obj = Portfolio(
-        type="Overview",
         user=user
     )
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
     return db_obj
+
+
+def delete_portfolio(*, session: Session, portfolio: Portfolio):
+    """
+    Delete portfolio.
+
+    Args:
+        session (Session): SQL session.
+        portfolio (Portfolio): Portfolio to delete.
+    """
+    # Delete portfolio.
+    session.delete(portfolio)
+    session.commit()
 
 # - - - - - - - - - - - - - - - - - - -
 

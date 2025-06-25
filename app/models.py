@@ -28,7 +28,7 @@ class UserPublic(UserBase):
 # - - - - - - - - - - - - - - - - - - -
 
 class PortfolioBase(SQLModel):
-    type: str
+    type: str = Field(default="Overview",max_length=255)
 
 class Portfolio(PortfolioBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
