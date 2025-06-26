@@ -335,7 +335,7 @@ def update_asset_buy_price(*, session: Session, asset: Asset, buy_price: float) 
     """
     asset.buy_price = buy_price
     session.commit()
-    session.refresh(Asset)
+    session.refresh(asset)
     return asset
 
 
@@ -353,7 +353,7 @@ def update_asset_volume(*, session: Session, asset: Asset, volume: float) -> Ass
     """
     asset.volume = volume
     session.commit()
-    session.refresh(Asset)
+    session.refresh(asset)
     return asset
 
 
