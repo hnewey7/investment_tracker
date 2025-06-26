@@ -66,16 +66,17 @@ class Instrument(InstrumentBase, table=True):
 class AssetBase(SQLModel):
     buy_date: datetime
     buy_price: float
+    volume: float
     currency: str = Field(max_length=5)
 
 
 class Asset(AssetBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    instrument_id: int = Field(foreign_key="instrument.id")
+    instrument_id: int = Field(index=True,foreign_key="instrument.id")
     instrument: Instrument = Relationship()
 
-    portfolio_id: int = Field(foreign_key="portfolio.id")
+    portfolio_id: int = Field(index=True,foreign_key="portfolio.id")
     portfolio: Portfolio = Relationship(back_populates="assets")
 
 # - - - - - - - - - - - - - - - - - - -

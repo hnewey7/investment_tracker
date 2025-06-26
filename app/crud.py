@@ -5,9 +5,11 @@ Created on 22-06-2025
 @author: Harry New
 
 '''
+from datetime import datetime
+
 from sqlmodel import Session, select
 
-from app.models import User, UserCreate, Portfolio, Instrument
+from app.models import User, UserCreate, Portfolio, Instrument, Asset, PreviousTrade
 from app.core.security import get_password_hash, verify_password
 
 # - - - - - - - - - - - - - - - - - - -
@@ -271,4 +273,97 @@ def delete_instrument(*, session: Session, instrument: Instrument):
     """
     # Delete instrument.
     session.delete(instrument)
+    session.commit()
+
+# - - - - - - - - - - - - - - - - - - -
+# ASSET OPERATIONS
+
+def create_asset(*, session: Session, portfolio: Portfolio, instrument: Instrument ,buy_date: datetime, buy_price: float, volume: float) -> Asset:
+    """
+    Create asset.
+
+    Args:
+        session (Session): SQL session.
+        portfolio (Portfolio): Portfolio.
+        instrument (Instrument): Instrument.
+        buy_date (datetime): Buy date.
+        buy_price (float): Buy price.
+        volume (float): Volume
+
+    Returns:
+        Asset: Asset.
+    """
+    db_obj = Asset(
+        portfolio=portfolio,
+        instrument=instrument,
+        buy_date=buy_date,
+        buy_price=buy_price,
+        volume=volume,
+        currency=instrument.currency
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_assets_by_instrument(*, session: Session, portfolio: Portfolio, instrument: Instrument):
+    """
+    Get assets from instrument within a given portfolio.
+
+    Args:
+        session (Session): _description_
+        portfolio (Portfolio): _description_
+        instrument (Instrument): _description_
+    """
+    statement = select(Asset).where(Asset.portfolio_id == portfolio.id).where(Asset.instrument_id == instrument.id)
+    results = session.exec(statement).all()
+    return results
+
+
+def update_asset_buy_price(*, session: Session, asset: Asset, buy_price: float) -> Asset:
+    """
+    Update buy price of an asset.
+
+    Args:
+        session (Session): SQL session.
+        asset (Asset): Asset to update.
+        buy_price (float): New buy price.
+
+    Returns:
+        Asset: Updated asset.
+    """
+    asset.buy_price = buy_price
+    session.commit()
+    session.refresh(Asset)
+    return asset
+
+
+def update_asset_volume(*, session: Session, asset: Asset, volume: float) -> Asset:
+    """
+    Update volume of an asset.
+
+    Args:
+        session (Session): SQL session.
+        asset (Asset): Asset to update.
+        volume (float): New volume.
+
+    Returns:
+        Asset: Updated asset.
+    """
+    asset.volume = volume
+    session.commit()
+    session.refresh(Asset)
+    return asset
+
+
+def delete_asset(*, session: Session, asset: Asset):
+    """
+    Deleting asset.
+
+    Args:
+        session (Session): SQL session.
+        asset (Asset): Asset to delete.
+    """
+    session.delete(asset)
     session.commit()
