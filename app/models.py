@@ -5,6 +5,8 @@ Created on 21-06-2025
 @author: Harry New
 
 '''
+from datetime import datetime
+
 from pydantic import EmailStr
 from sqlmodel import SQLModel, Field, Relationship
 
@@ -14,13 +16,16 @@ class UserBase(SQLModel):
     username: str = Field(unique=True, max_length=255)
     email: EmailStr = Field(unique=True, index=True, max_length=255)
 
+
 class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     portfolio: "Portfolio" = Relationship(back_populates="user")
     hashed_password: str
 
+
 class UserCreate(UserBase):
     password: str = Field(min_length=8, max_length=40)
+
 
 class UserPublic(UserBase):
     id: int
@@ -30,12 +35,14 @@ class UserPublic(UserBase):
 class PortfolioBase(SQLModel):
     type: str = Field(default="Overview",max_length=255)
 
+
 class Portfolio(PortfolioBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    user_id: int | None = Field(default=None, foreign_key="user.id")
+    user_id: int = Field(foreign_key="user.id")
     user: User = Relationship(back_populates="portfolio")
 
+    assets: list["Asset"] = Relationship(back_populates="portfolio")
     previous_trades: list["PreviousTrade"] = Relationship(back_populates="portfolio")
 
 # - - - - - - - - - - - - - - - - - - -
@@ -50,13 +57,42 @@ class InstrumentBase(SQLModel):
     low: float | None
     close: float | None
 
+
 class Instrument(InstrumentBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
 # - - - - - - - - - - - - - - - - - - -
 
-class PreviousTrade(SQLModel, table=True):
+class AssetBase(SQLModel):
+    buy_date: datetime
+    buy_price: float
+    currency: str = Field(max_length=5)
+
+
+class Asset(AssetBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    portfolio_id: int | None = Field(default=None, foreign_key="portfolio.id")
+    instrument_id: int = Field(foreign_key="instrument.id")
+    instrument: Instrument = Relationship()
+
+    portfolio_id: int = Field(foreign_key="portfolio.id")
+    portfolio: Portfolio = Relationship(back_populates="assets")
+
+# - - - - - - - - - - - - - - - - - - -
+
+class PreviousTradeBase(AssetBase):
+    sell_date: datetime
+    sell_price: float
+    profit_loss: float
+
+
+class PreviousTrade(PreviousTradeBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+
+    instrument_id: int = Field(foreign_key="instrument.id")
+    instrument: Instrument = Relationship()
+
+    portfolio_id: int = Field(foreign_key="portfolio.id")
     portfolio: Portfolio = Relationship(back_populates="previous_trades")
+
+# - - - - - - - - - - - - - - - - - - -
