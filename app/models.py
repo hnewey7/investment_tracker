@@ -84,7 +84,6 @@ class Asset(AssetBase, table=True):
 class PreviousTradeBase(AssetBase):
     sell_date: datetime
     sell_price: float
-    profit_loss: float
 
 
 class PreviousTrade(PreviousTradeBase, table=True):

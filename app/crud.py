@@ -367,3 +367,77 @@ def delete_asset(*, session: Session, asset: Asset):
     """
     session.delete(asset)
     session.commit()
+
+# - - - - - - - - - - - - - - - - - - -
+# PREVIOUS TRADE OPERATIONS
+
+def create_previous_trade(*, session:Session, asset:Asset, sell_date:datetime, sell_price: float) -> PreviousTrade:
+    """
+    Create previous trade from asset.
+
+    Args:
+        session (Session): SQL session
+        asset (Asset): Asset to create previous trade from.
+        sell_date (datetime): Sell datetime.
+        sell_price (float): Sell price.
+    
+    Returns:
+        PreviousTrade: New previous trade.
+    """
+    db_obj = PreviousTrade.model_validate(asset,
+        update={
+            "sell_date":sell_date,
+            "sell_price":sell_price
+        }
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_previous_trade_by_instrument(*, session:Session, portfolio:Portfolio, instrument:Instrument) -> PreviousTrade:
+    """
+    Get previous trade by instrument for a given portfolio.
+
+    Args:
+        session (Session): SQL session.
+        portfolio (Portfolio): Portfolio.
+        instrumnet (Instrument): Instrument.
+
+    Returns:
+        PreviousTrade: Previous trade.
+    """
+    statement = select(PreviousTrade).where(PreviousTrade.portfolio_id == portfolio.id).where(PreviousTrade.instrument_id == instrument.id)
+    results = session.exec(statement).all()
+    return results
+
+
+def update_previous_trade_sell_price(*, session:Session, previous_trade:PreviousTrade, sell_price:float) -> PreviousTrade:
+    """
+    Update previous trade's sell price.
+
+    Args:
+        session (Session): SQL session.
+        previous_trade (PreviousTrade): Previous trade.
+        sell_price (float): Sell price.
+
+    Returns:
+        PreviousTrade: Previous trade.
+    """
+    previous_trade.sell_price = sell_price
+    session.commit()
+    session.refresh(previous_trade)
+    return previous_trade
+
+
+def delete_previous_trade(*, session:Session, previous_trade:PreviousTrade):
+    """
+    Delete previous trade.
+
+    Args:
+        session (Session): SQL session.
+        previous_trade (PreviousTrade): Previous trade.
+    """
+    session.delete(previous_trade)
+    session.commit()

@@ -9,7 +9,7 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from app.models import UserCreate, User, Portfolio, Instrument, Asset
+from app.models import UserCreate, User, Portfolio, Instrument, Asset, PreviousTrade
 from app import crud
 from app.tests.utils.utils import random_email, random_lower_string
 from app.core.security import verify_password
@@ -455,6 +455,7 @@ def test_create_asset(db:Session,portfolio:Portfolio,instrument:Instrument):
     assert db_obj.instrument_id == instrument.id
     assert db_obj.portfolio == portfolio
     assert db_obj.portfolio_id == portfolio.id
+    assert db_obj.currency == instrument.currency
 
 
 def test_get_assets_by_instrument(db:Session,portfolio:Portfolio,instrument:Instrument):
@@ -556,3 +557,140 @@ def test_delete_asset(db:Session,portfolio:Portfolio,instrument:Instrument):
     crud.delete_asset(session=db,asset=asset)
     db_obj = crud.get_assets_by_instrument(session=db,portfolio=portfolio,instrument=instrument)
     assert len(db_obj) == 0
+
+# - - - - - - - - - - - - - - - - - - -
+# PREVIOUS TRADES TESTS
+
+def test_create_previous_trade(db:Session,portfolio:Portfolio,instrument:Instrument):
+    """
+    Test create previous trade.
+
+    Args:
+        db (Session): SQL session.
+        portfolio (Portfolio): Test portfolio.
+        instrument (Instrument): Test instrument.
+    """
+    # Properties.
+    previous_trade_properties = {
+        "sell_date":datetime.now(),
+        "sell_price":1
+    }
+    asset_properties = {
+        "buy_date":datetime.now(),
+        "buy_price":1,
+        "volume":1
+    }
+
+    # Create asset.
+    asset = crud.create_asset(session=db,portfolio=portfolio,instrument=instrument,**asset_properties)
+
+    # Create previous trade.
+    db_obj = crud.create_previous_trade(session=db,asset=asset,**previous_trade_properties)
+
+    # Check properties.
+    assert db_obj.sell_date == previous_trade_properties["sell_date"]
+    assert db_obj.sell_price == previous_trade_properties["sell_price"]
+    assert db_obj.buy_date == asset.buy_date
+    assert db_obj.buy_price == asset.buy_price
+    assert db_obj.volume == asset.volume
+    assert db_obj.instrument == asset.instrument
+    assert db_obj.instrument_id == asset.instrument_id
+    assert db_obj.portfolio == asset.portfolio
+    assert db_obj.portfolio_id == asset.portfolio_id
+
+
+def test_get_previous_trade_by_instrument(db:Session,portfolio:Portfolio,instrument:Instrument):
+    """
+    Test create previous trade.
+
+    Args:
+        db (Session): SQL session.
+        portfolio (Portfolio): Test portfolio.
+        instrument (Instrument): Test instrument.
+    """
+    # Properties.
+    previous_trade_properties = {
+        "sell_date":datetime.now(),
+        "sell_price":1
+    }
+    asset_properties = {
+        "buy_date":datetime.now(),
+        "buy_price":1,
+        "volume":1
+    }
+
+    # Create asset.
+    asset = crud.create_asset(session=db,portfolio=portfolio,instrument=instrument,**asset_properties)
+
+    # Create previous trade.
+    previous_trade = crud.create_previous_trade(session=db,asset=asset,**previous_trade_properties)
+
+    # Get previous trade.
+    db_objs = crud.get_previous_trade_by_instrument(session=db,portfolio=portfolio,instrument=instrument)
+    assert db_objs[0] == previous_trade
+
+
+def test_update_previous_trade_sell_price(db:Session,portfolio:Portfolio,instrument:Instrument):
+    """
+    Test update previous trade's sell price.
+
+    Args:
+        db (Session): SQL session.
+        portfolio (Portfolio): Test portfolio.
+        instrument (Instrument): Test instrument.
+    """
+    # Properties.
+    previous_trade_properties = {
+        "sell_date":datetime.now(),
+        "sell_price":1,
+    }
+    asset_properties = {
+        "buy_date":datetime.now(),
+        "buy_price":1,
+        "volume":1
+    }
+    new_sell_price = 2
+
+    # Create asset.
+    asset = crud.create_asset(session=db,portfolio=portfolio,instrument=instrument,**asset_properties)
+
+    # Create previous trade.
+    previous_trade = crud.create_previous_trade(session=db,asset=asset,**previous_trade_properties)
+
+    # Update previous trade.
+    db_obj = crud.update_previous_trade_sell_price(session=db,previous_trade=previous_trade,sell_price=new_sell_price)
+    assert db_obj.sell_price == new_sell_price
+
+
+def test_delete_previous_trade(db:Session,portfolio:Portfolio,instrument:Instrument):
+    """
+    Test delete previous trade.
+
+    Args:
+        db (Session): SQL session.
+        portfolio (Portfolio): Test portfolio.
+        instrument (Instrument): Test instrument.
+    """
+    # Properties.
+    previous_trade_properties = {
+        "sell_date":datetime.now(),
+        "sell_price":1,
+    }
+    asset_properties = {
+        "buy_date":datetime.now(),
+        "buy_price":1,
+        "volume":1
+    }
+
+    # Create asset.
+    asset = crud.create_asset(session=db,portfolio=portfolio,instrument=instrument,**asset_properties)
+
+    # Create previous trade.
+    previous_trade = crud.create_previous_trade(session=db,asset=asset,**previous_trade_properties)
+    db_objs = crud.get_previous_trade_by_instrument(session=db,portfolio=portfolio,instrument=instrument)
+    assert db_objs[0] == previous_trade
+
+    # Delete previous trade.
+    crud.delete_previous_trade(session=db,previous_trade=previous_trade)
+    db_objs = crud.get_previous_trade_by_instrument(session=db,portfolio=portfolio,instrument=instrument)
+    assert len(db_objs) == 0

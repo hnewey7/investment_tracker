@@ -15,7 +15,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.core.db import engine, create_db_and_tables, clear_db
 from app.core.config import test_settings
-from app.models import User, UserCreate, Instrument, Portfolio, Asset
+from app.models import User, UserCreate, Instrument, Portfolio, Asset, PreviousTrade
 from app.tests.utils.utils import random_email, random_lower_string
 from app import crud
 
