@@ -37,13 +37,13 @@ def clear_db_and_tables():
     Clearing database.
     """
     # Clear database.
-    SQLModel.metadata.drop_all()
+    SQLModel.metadata.drop_all(bind=engine)
 
 # - - - - - - - - - - - - - - - - - - -
 
 def main():
     logger.info("Clear database.")
-    clear_db_and_tables
+    clear_db_and_tables()
     logger.info("Creating initial database.")
     create_db_and_tables()
     logger.info("Initial database created successfully.")

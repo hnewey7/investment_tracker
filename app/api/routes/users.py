@@ -8,19 +8,44 @@ Created on 22-06-2025
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
+from sqlmodel import select, func
 
 from app import crud
-from app.models import UserCreate, UserPublic
+from app.models import UserCreate, UserPublic, User, UsersPublic
 from app.api.deps import SessionDep
 
 # - - - - - - - - - - - - - - - - - - -
 
-router = APIRouter(tags=["users"])
+router = APIRouter(prefix="/users",tags=["users"])
 
 # - - - - - - - - - - - - - - - - - - -
 
+@router.get(
+    "/",
+    response_model=UsersPublic
+)
+def get_users(*, session: SessionDep, skip: int=0, limit: int=100):
+    """
+    Get users.
+
+    Args:
+        session (SessionDep): SQL session.
+        skip (int, optional): Skip results. Defaults to 0.
+        limit (int, optional): Limit results. Defaults to 100.
+    """
+    count_statement = select(func.count()).select_from(User)
+    count = session.exec(count_statement).one()
+    print(count)
+
+    statement = select(User).offset(skip).limit(limit)
+    users = session.exec(statement).all()
+    print(users)
+
+    return UsersPublic(data=users, count=count)
+
+
 @router.post(
-    "/users",
+    "/",
     response_model=UserPublic
 )
 def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:

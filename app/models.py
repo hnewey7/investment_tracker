@@ -30,6 +30,11 @@ class UserCreate(UserBase):
 class UserPublic(UserBase):
     id: int
 
+
+class UsersPublic(SQLModel):
+    data: list[UserPublic]
+    count: int
+
 # - - - - - - - - - - - - - - - - - - -
 
 class PortfolioBase(SQLModel):
