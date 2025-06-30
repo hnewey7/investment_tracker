@@ -112,6 +112,35 @@ def test_get_user_by_username_none(db:Session):
     assert db_obj == None
 
 
+def test_get_user_by_id(db:Session, user:User):
+    """
+    Testing get user by id.
+
+    Args:
+        db (Session): SQL session.
+        user (User): Test user.
+    """
+    # Get user by id.
+    db_obj = crud.get_user_by_id(session=db,id=user.id)
+
+    # Check db obj.
+    assert db_obj == user
+
+
+def test_get_user_by_id_none(db:Session):
+    """
+    Testing get user by id when no user with id.
+
+    Args:
+        db (Session): SQL session.
+    """
+    # Get user by id.
+    db_obj = crud.get_user_by_id(session=db,id=1)
+
+    # Check db obj.
+    assert db_obj == None
+
+
 def test_valid_authenticate(db:Session):
     """
     Test valid user authenication.

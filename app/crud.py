@@ -67,6 +67,22 @@ def get_user_by_username(*, session: Session, username: str) -> User | None:
     return session_user
 
 
+def get_user_by_id(*, session: Session, id: int) -> User | None:
+    """
+    Get user by id.
+
+    Args:
+        session (Session): SQL session.
+        id (int): User id.
+
+    Returns:
+        User | None: User model.
+    """
+    statement = select(User).where(User.id == id)
+    session_user = session.exec(statement).first()
+    return session_user
+
+
 def authenticate(*, session: Session, email: str = None, username: str = None , password: str) -> User | None:
     """
     Authenticate user.
