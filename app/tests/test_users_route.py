@@ -179,3 +179,24 @@ def test_get_user_invalid(client: TestClient):
         "email":random_email
     })
     assert response.status_code == 400
+
+
+def test_delete_user(client: TestClient, user: User):
+    """
+    Test deleting user.
+
+    Args:
+        client (TestClient): Test client.
+        user (User): Test user.
+    """
+    # Delete user.
+    response = client.delete(f"/users/{user.id}")
+    delete_response = response.json()
+    assert response.status_code == 200
+    assert delete_response["username"] == user.username
+    assert delete_response["email"] == user.email
+    assert delete_response["id"] == user.id
+
+    # Delete again for invalid.
+    response = client.delete(f"/users/{user.id}")
+    assert response.status_code == 400

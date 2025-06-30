@@ -125,3 +125,26 @@ def get_user(*, session: SessionDep, username: str = None, email: str = None):
             detail="No user exists with these details."
         )
     return user
+
+
+@router.delete(
+    "/{user_id}",
+    response_model=UserPublic
+)
+def delete_user(*, session: SessionDep, user_id: int):
+    """
+    Delete user by id.
+
+    Args:
+        session (SessionDep): SQL session.
+        user_id (int): User id.
+    """
+    user = crud.get_user_by_id(session=session, id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="Unable to find user with id."
+        )
+    
+    crud.delete_user(session=session,user=user)
+    return user
