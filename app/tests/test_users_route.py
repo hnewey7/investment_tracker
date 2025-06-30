@@ -159,3 +159,23 @@ def test_get_user(client: TestClient, user: User):
         "username":random_lower_string()
     })
     assert response.status_code == 400
+
+
+def test_get_user_invalid(client: TestClient):
+    """
+    Test get individual user for invalid details.
+
+    Args:
+        client (TestClient): Test client.
+    """
+    # Get user by invalid username.
+    response = client.get("/users/user/",params={
+        "username":random_lower_string
+    })
+    assert response.status_code == 400
+
+    # Get user by invalid email.
+    response = client.get("/users/user/",params={
+        "email":random_email
+    })
+    assert response.status_code == 400
