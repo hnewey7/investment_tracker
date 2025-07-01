@@ -13,10 +13,12 @@ from sqlmodel import select, func
 from app import crud
 from app.models import UserCreate, UserPublic, User, UsersPublic
 from app.api.deps import SessionDep
+from app.api.routes import portfolio
 
 # - - - - - - - - - - - - - - - - - - -
 
 router = APIRouter(prefix="/users",tags=["users"])
+router.include_router(portfolio.router, prefix="/{user_id}/portfolio", tags=["portfolio"])
 
 # - - - - - - - - - - - - - - - - - - -
 # /USERS ENDPOINT
@@ -130,7 +132,7 @@ def update_user(*, session: SessionDep, user_id: int, username: str = None, pass
 
     if password:
         updated_user = crud.change_password(session=session,email=user.email,new_password=password)
-        
+
     return updated_user
 
 
@@ -155,3 +157,5 @@ def delete_user(*, session: SessionDep, user_id: int):
     
     crud.delete_user(session=session,user=user)
     return user
+
+# - - - - - - - - - - - - - - - - - - -

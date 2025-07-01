@@ -1,0 +1,47 @@
+'''
+Module for handling portfolio endpoints.
+
+Created on 01-07-2025
+@author: Harry New
+
+'''
+from fastapi import APIRouter, HTTPException
+
+from app.models import Portfolio
+from app.api.deps import SessionDep
+from app import crud
+
+# - - - - - - - - - - - - - - - - - - -
+
+router = APIRouter()
+
+# - - - - - - - - - - - - - - - - - - -
+
+@router.get(
+    "/",
+    response_model=Portfolio
+)
+def get_portfolio(*, session: SessionDep, user_id: int):
+    """
+    Get portfolio for user.
+
+    Args:
+        session (SessionDep): SQL session.
+        user_id (int): User id.
+    """
+    # Get user.
+    user = crud.get_user_by_id(session=session,id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="No user with this id."
+        )
+
+    # Get user's portfolio.
+    portfolio = user.portfolio
+    if not portfolio:
+        raise HTTPException(
+            status_code=400,
+            detail="No portfolio associated with the user."
+        )
+    return user.portfolio
