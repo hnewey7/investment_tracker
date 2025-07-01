@@ -16,6 +16,7 @@ from app import crud
 router = APIRouter()
 
 # - - - - - - - - - - - - - - - - - - -
+# GET /USERS/{USER_ID}/PORTFOLIO
 
 @router.get(
     "/",
@@ -45,3 +46,30 @@ def get_portfolio(*, session: SessionDep, user_id: int):
             detail="No portfolio associated with the user."
         )
     return user.portfolio
+
+# - - - - - - - - - - - - - - - - - - -
+# POST /USERS/{USER_ID}/PORTFOLIO
+
+@router.post(
+    "/",
+    response_model=Portfolio
+)
+def create_portfolio(*, session: SessionDep, user_id: int):
+    """
+    Create portfolio for user.
+
+    Args:
+        session (SessionDep): SQL session.
+        user_id (int): User id.
+    """
+    # Get user.
+    user = crud.get_user_by_id(session=session,id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="No user with this id."
+        )
+
+    # Create portfolio.
+    portfolio = crud.create_portfolio(session=session, user=user)
+    return portfolio
