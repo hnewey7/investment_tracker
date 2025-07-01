@@ -19,6 +19,7 @@ from app.api.deps import SessionDep
 router = APIRouter(prefix="/users",tags=["users"])
 
 # - - - - - - - - - - - - - - - - - - -
+# /USERS ENDPOINT
 
 @router.get(
     "/",
@@ -75,6 +76,8 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     user = crud.create_user(session=session, user_create=user_in)
     return user
 
+# - - - - - - - - - - - - - - - - - - -
+# /USERS/{USER_ID} ENDPOINT
 
 @router.get(
     "/{user_id}",
@@ -95,6 +98,40 @@ def get_user_by_id(*, session: SessionDep, user_id: int):
             detail="No user exists with this id."
         )
     return user
+
+
+@router.put(
+    "/{user_id}",
+    response_model = UserPublic
+)
+def update_user(*, session: SessionDep, user_id: int, username: str = None, password: str = None) -> User:
+    """
+    Update user by user id.
+
+    Args:
+        session (SessionDep): SQL session.
+        username (str, optional): New username. Defaults to None.
+        password (str, optional): New password. Defaults to None.
+
+    Returns:
+        User: _description_
+    """
+    # Get user to update.
+    user = crud.get_user_by_id(session=session,id=user_id)
+
+    if not username and not password:
+        raise HTTPException(
+            status_code=400,
+            detail="No user details to update."
+        )
+    
+    if username:
+        updated_user = crud.change_username(session=session,email=user.email,new_username=username)
+
+    if password:
+        updated_user = crud.change_password(session=session,email=user.email,new_password=password)
+        
+    return updated_user
 
 
 @router.delete(

@@ -12,9 +12,10 @@ from sqlmodel import Session
 
 from app.models import User
 from app.tests.utils.utils import random_email, random_lower_string
+from app import crud
 
 # - - - - - - - - - - - - - - - - - - -
-# GET USERS TESTS
+# GET /USERS TESTS
 
 def test_get_users(client: TestClient, user: User):
     """
@@ -104,6 +105,7 @@ def test_get_multiple_users(client: TestClient, multiple_users: list[User]):
     assert len(skipped_users_list["data"]) == 9
 
 # - - - - - - - - - - - - - - - - - - -
+# CREATE /USERS TESTS
 
 def test_create_user(client: TestClient):
     """
@@ -152,6 +154,8 @@ def test_create_existing_user(client: TestClient, user: User):
     response = client.post("/users",json=user_properties)
     assert response.status_code == 400
 
+# - - - - - - - - - - - - - - - - - - -
+# GET /USERS/{USER_ID} TESTS
 
 def test_get_user_by_id(client: TestClient, user:User):
     """
@@ -182,6 +186,79 @@ def test_get_user_by_id_invalid(client: TestClient):
     response = client.get(f"/users/1")
     assert response.status_code == 400
 
+# - - - - - - - - - - - - - - - - - - -
+# UPDATE /USERS/{USER_ID} TESTS
+
+def test_update_username(client: TestClient, user: User):
+    """
+    Test updating a user's username.
+
+    Args:
+        client (TestClient): Test client.
+        user (User): Test user.
+    """
+    # New username
+    new_username = random_lower_string()
+
+    # Send put request.
+    response = client.put(f"/users/{user.id}",params={
+        "username":new_username
+    })
+    user_response = response.json()
+    assert response.status_code == 200
+    assert user_response["username"] == new_username
+    assert user_response["email"] == user.email
+    assert user_response["id"] == user.id
+
+
+def test_update_password(client: TestClient, db: Session, user: User):
+    """
+    Test updating a user's password.
+
+    Args:
+        client (TestClient): Test client.
+        db (Session): SQL session.
+        user (User): Test user.
+    """
+    # New password
+    new_password = random_lower_string()
+
+    # Send put request.
+    response = client.put(f"/users/{user.id}",params={
+        "password":new_password
+    })
+    assert response.status_code == 200
+    assert crud.authenticate(session=db,email=user.email,password=new_password)
+
+
+def test_update_username_and_password(client: TestClient, db: Session, user: User):
+    """
+    Test updating user's username and password.
+
+    Args:
+        client (TestClient): Test client.
+        db (Session): SQL session.
+        user (User): Test user.
+    """
+    # New username and password.
+    new_username = random_lower_string()
+    new_password = random_lower_string()
+
+    # Send put request.
+    response = client.put(f"/users/{user.id}",params={
+        "username": new_username,
+        "password": new_password
+    })
+    user_response = response.json()
+    assert response.status_code == 200
+    assert user_response["username"] == new_username
+    assert user_response["email"] == user.email
+    assert user_response["id"] == user.id
+    assert crud.authenticate(session=db,email=user.email,password=new_password)
+    assert crud.authenticate(session=db,username=new_username,password=new_password)
+
+# - - - - - - - - - - - - - - - - - - -
+# DELETE /USERS/{USER_ID} TESTS 
 
 def test_delete_user(client: TestClient, user: User):
     """
