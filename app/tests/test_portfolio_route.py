@@ -72,6 +72,10 @@ def test_create_portfolio(client: TestClient, user: User):
     assert "type" in portfolio_json.keys()
     assert portfolio_json["user_id"] == user.id
 
+    # Check user has updated portfolio.
+    response = client.get(f"/users/{user.id}/portfolio")
+    assert response.status_code == 200
+
 
 def test_create_portfolio_invalid_user(client: TestClient):
     """
@@ -82,4 +86,52 @@ def test_create_portfolio_invalid_user(client: TestClient):
     """
     # Send post request.
     response = client.post(f"/users/1/portfolio")
+    assert response.status_code == 400
+
+# - - - - - - - - - - - - - - - - - - -
+# DELETE /USERS/{USER_ID}/PORTFOLIO TESTS
+
+def test_delete_portfolio(client: TestClient, portfolio: Portfolio):
+    """
+    Test delete portfolio.
+
+    Args:
+        client (TestClient): Test client.
+        portfolio (Portfolio): Test portfolio.
+    """
+    # Send delete request.
+    response = client.delete(f"/users/{portfolio.user_id}/portfolio")
+    portfolio_json = response.json()
+    assert response.status_code == 200
+    assert portfolio_json["id"] == portfolio.id
+    assert portfolio_json["type"] == portfolio.type
+    assert portfolio_json["user_id"] == portfolio.user_id
+
+    # Check get request fails.
+    response = client.get(f"/users/{portfolio.user_id}/portfolio")
+    assert response.status_code == 400
+
+
+def test_delete_portfolio_invalid_user(client: TestClient):
+    """
+    Test delete portfolio for invalid user.
+
+    Args:
+        client (TestClient): Test client.
+    """
+    # Send delete request.
+    response = client.delete("/users/1/portfolio")
+    assert response.status_code == 400
+
+
+def test_delete_portfolio_invalid_portfolio(client: TestClient, user: User):
+    """
+    Test delete portfolio for invalid portfolio.
+
+    Args:
+        client (TestClient): Test client.
+        user (User): Test user.
+    """
+    # Send delete request.
+    response = client.delete(f"/users/{user.id}/portfolio")
     assert response.status_code == 400

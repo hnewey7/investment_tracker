@@ -73,3 +73,36 @@ def create_portfolio(*, session: SessionDep, user_id: int):
     # Create portfolio.
     portfolio = crud.create_portfolio(session=session, user=user)
     return portfolio
+
+# - - - - - - - - - - - - - - - - - - -
+# DELETE /USERS/{USER_ID}/PORTFOLIO
+
+@router.delete(
+    "/",
+    response_model=Portfolio
+)
+def delete_portfolio(*, session: SessionDep, user_id: int):
+    """
+    Delete a user's portfolio.
+
+    Args:
+        session (SessionDep): SQL session.
+        user_id (int): User id.
+    """
+    # Get user.
+    user = crud.get_user_by_id(session=session,id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="No user with this id."
+        )
+    portfolio = user.portfolio
+    if not portfolio:
+        raise HTTPException(
+            status_code=400,
+            detail="No portfolio associated with user."
+        )
+
+    # Delete portfolio.
+    crud.delete_portfolio(session=session, portfolio=portfolio)
+    return portfolio
