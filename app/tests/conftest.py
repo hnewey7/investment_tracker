@@ -51,6 +51,24 @@ def user() -> Generator[User, None, None]:
     yield user
 
 
+@pytest.fixture
+def multiple_users(request) -> Generator[list[User], None, None]:
+    # User list.
+    users = []
+    with Session(engine) as session:
+        for i in range(request.param):
+            # Create users.
+            properties = {
+                "username": random_lower_string(),
+                "email": random_email(),
+                "password": random_lower_string()
+            }
+            user_create = UserCreate(**properties)
+            user = crud.create_user(session=session,user_create=user_create)
+            users.append(user)
+    yield users
+
+
 @pytest.fixture(scope="function")
 def portfolio(user) -> Generator[Portfolio, None, None]:
     with Session(engine) as session:

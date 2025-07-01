@@ -5,6 +5,7 @@ Created on 29-06-2025
 @author: Harry New
 
 '''
+import pytest
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session
@@ -13,6 +14,7 @@ from app.models import User
 from app.tests.utils.utils import random_email, random_lower_string
 
 # - - - - - - - - - - - - - - - - - - -
+# GET USERS TESTS
 
 def test_get_users(client: TestClient, user: User):
     """
@@ -35,6 +37,73 @@ def test_get_users(client: TestClient, user: User):
     assert user_list["data"][0]["email"] == user.email
     assert user_list["data"][0]["id"] == user.id
 
+
+    # Repeat for email query.
+    # Send request to get users with email query.
+    response = client.get("/users",params={
+        "email":user.email
+    })
+    user_list = response.json()
+
+    # Check length of response.
+    assert len(user_list["data"]) == 1
+    assert user_list["count"] == 1
+
+    # Check user provided.
+    assert user_list["data"][0]["username"] == user.username
+    assert user_list["data"][0]["email"] == user.email
+    assert user_list["data"][0]["id"] == user.id
+
+    
+    # Repeat for username query.
+    # Send request to get users with username query.
+    response = client.get("/users",params={
+        "username":user.username
+    })
+    user_list = response.json()
+
+    # Check length of response.
+    assert len(user_list["data"]) == 1
+    assert user_list["count"] == 1
+
+    # Check user provided.
+    assert user_list["data"][0]["username"] == user.username
+    assert user_list["data"][0]["email"] == user.email
+    assert user_list["data"][0]["id"] == user.id
+
+
+@pytest.mark.parametrize("multiple_users", [10], indirect=True)
+def test_get_multiple_users(client: TestClient, multiple_users: list[User]):
+    """
+    Test getting multiple users.
+
+    Args:
+        client (TestClient): Test client.
+        multiple_users (list[User]): Test users.
+    """
+    # Send standard get request.
+    response = client.get("/users")
+    users_list = response.json()
+    assert users_list["count"] == 10
+    assert len(users_list["data"]) == 10
+
+    # Send limited request.
+    response = client.get("/users",params={
+        "limit":5
+    })
+    users_list = response.json()
+    assert users_list["count"] == 10
+    assert len(users_list["data"]) == 5
+
+    # Send skipped request.
+    response = client.get("/users",params={
+        "skip":1
+    })
+    skipped_users_list = response.json()
+    assert skipped_users_list["count"] == 10
+    assert len(skipped_users_list["data"]) == 9
+
+# - - - - - - - - - - - - - - - - - - -
 
 def test_create_user(client: TestClient):
     """
@@ -111,73 +180,6 @@ def test_get_user_by_id_invalid(client: TestClient):
     """
     # Send get request for invalid id.
     response = client.get(f"/users/1")
-    assert response.status_code == 400
-
-
-def test_get_user(client: TestClient, user: User):
-    """
-    Test get user endpoint.
-
-    Args:
-        client (TestClient): Test client.
-        user (User): Test user.
-    """
-    # Get user by username.
-    response = client.get("/users/user/",params={
-        "username":user.username
-    })
-    username_response = response.json()
-    assert response.status_code == 200
-    assert username_response["username"] == user.username
-    assert username_response["email"] == user.email
-    assert username_response["id"] == user.id
-
-    # Get user by email.
-    response = client.get("/users/user/",params={
-        "email":user.email
-    })
-    email_response = response.json()
-    assert response.status_code == 200
-    assert email_response["username"] == user.username
-    assert email_response["email"] == user.email
-    assert email_response["id"] == user.id
-
-    # Get user with email and username
-    response = client.get("/users/user/",params={
-        "email":user.email,
-        "username":user.username
-    })
-    email_username_response = response.json()
-    assert response.status_code == 200
-    assert email_username_response["username"] == user.username
-    assert email_username_response["email"] == user.email
-    assert email_username_response["id"] == user.id
-
-    # Get user with valid email and invalid username.
-    response = client.get("/users/user/",params={
-        "email":user.email,
-        "username":random_lower_string()
-    })
-    assert response.status_code == 400
-
-
-def test_get_user_invalid(client: TestClient):
-    """
-    Test get individual user for invalid details.
-
-    Args:
-        client (TestClient): Test client.
-    """
-    # Get user by invalid username.
-    response = client.get("/users/user/",params={
-        "username":random_lower_string
-    })
-    assert response.status_code == 400
-
-    # Get user by invalid email.
-    response = client.get("/users/user/",params={
-        "email":random_email
-    })
     assert response.status_code == 400
 
 
