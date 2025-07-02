@@ -57,7 +57,7 @@ def get_users(*, session: SessionDep, skip: int=0, limit: int=100, email: str=No
     "/",
     response_model=UserPublic
 )
-def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
+def create_user(*, session: SessionDep, user_in: UserCreate) -> User:
     """
     Create new user.
 

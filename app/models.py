@@ -57,14 +57,14 @@ class InstrumentBase(SQLModel):
     exchange: str = Field(max_length=255)
     symbol: str = Field(index=True,max_length=255)
     currency: str = Field(max_length=5)
-    open: float | None
-    high: float | None
-    low: float | None
-    close: float | None
 
 
 class Instrument(InstrumentBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
+    open: float | None
+    high: float | None
+    low: float | None
+    close: float | None
 
 # - - - - - - - - - - - - - - - - - - -
 
