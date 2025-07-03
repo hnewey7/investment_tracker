@@ -235,6 +235,22 @@ def get_instrument_by_symbol(*, session: Session, symbol:str) -> Instrument:
     return session_instrument
 
 
+def get_instrument_by_id(*, session: Session, id: int) -> Instrument:
+    """
+    Get instrument by id.
+
+    Args:
+        session (Session): SQL session.
+        id (int): Instrument id.
+
+    Returns:
+        Instrument: Instrument
+    """
+    statement = select(Instrument).where(Instrument.id == id)
+    session_instrument = session.exec(statement).first()
+    return session_instrument
+
+
 def update_price(*, session: Session, instrument: Instrument, open: float, high: float, low: float, close: float) -> Instrument:
     """
     Update price of an instrument.

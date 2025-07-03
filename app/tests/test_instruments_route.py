@@ -83,3 +83,24 @@ def test_create_instrument(client: TestClient):
     assert instrument_json["exchange"] == properties["exchange"]
     assert instrument_json["symbol"] == properties["symbol"]
     assert instrument_json["currency"] == properties["currency"]
+
+# - - - - - - - - - - - - - - - - - - -
+# GET /INSTRUMENTS/{INSTRUMENT_ID}
+
+def test_get_instrument(client: TestClient, instrument: Instrument):
+    """
+    Test get instrument.
+
+    Args:
+        client (TestClient): Test client.
+        instrument (Instrument): Test instrument.
+    """
+    # Send get request.
+    response = client.get(f"/instruments/{instrument.id}")
+    instrument_json = response.json()
+    assert response.status_code == 200
+    assert instrument_json["id"] == instrument.id
+    assert instrument_json["name"] == instrument.name
+    assert instrument_json["exchange"] == instrument.exchange
+    assert instrument_json["symbol"] == instrument.symbol
+    assert instrument_json["currency"] == instrument.currency

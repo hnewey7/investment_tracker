@@ -371,6 +371,19 @@ def test_get_instrument_by_symbol(db: Session, instrument:Instrument):
     assert db_obj == instrument
 
 
+def test_get_instrument_by_id(db: Session, instrument:Instrument):
+    """
+    Test get instrument by id.
+
+    Args:
+        db (Session): SQL session.
+        instrument (Instrument): Test instrument.
+    """
+    # Get instrument.
+    db_obj = crud.get_instrument_by_id(session=db,id=instrument.id)
+    assert db_obj == instrument
+
+
 def test_update_instrument_price(db: Session):
     """
     Test update instrument price.

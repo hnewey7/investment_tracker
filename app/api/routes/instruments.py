@@ -85,3 +85,27 @@ def create_instrument(*, session: SessionDep, instrument_in: InstrumentBase):
         currency=instrument_in.currency
     )
     return instrument
+
+# - - - - - - - - - - - - - - - - - - -
+# GET /INSTRUMENTS/{INSTRUMENT_ID}
+
+@router.get(
+    "/{instrument_id}",
+    response_model=Instrument
+)
+def get_instrument(*, session: SessionDep, instrument_id: int):
+    """
+    Get instrument.
+
+    Args:
+        session (SessionDep): SQL session.
+        instrument_id (int): Instrument ID.
+    """
+    # Get instrument.
+    instrument = crud.get_instrument_by_id(session=session, id=instrument_id)
+    if not instrument:
+        raise HTTPException(
+            status_code=400,
+            detail="No instrument exists with instrument id."
+        )
+    return instrument
