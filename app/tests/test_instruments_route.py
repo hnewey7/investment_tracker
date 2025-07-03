@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from app.models import Instrument
 
 # - - - - - - - - - - - - - - - - - - -
-# GET /INSTRUMENTS
+# GET /INSTRUMENTS TESTS
 
 def test_get_instruments(client: TestClient, instrument: Instrument):
     """
@@ -59,7 +59,7 @@ def test_get_instruments(client: TestClient, instrument: Instrument):
     assert len(instrument_list_json["data"]) == 0
 
 # - - - - - - - - - - - - - - - - - - -
-# POST /INSTRUMENTS
+# POST /INSTRUMENTS TESTS
 
 def test_create_instrument(client: TestClient):
     """
@@ -85,7 +85,7 @@ def test_create_instrument(client: TestClient):
     assert instrument_json["currency"] == properties["currency"]
 
 # - - - - - - - - - - - - - - - - - - -
-# GET /INSTRUMENTS/{INSTRUMENT_ID}
+# GET /INSTRUMENTS/{INSTRUMENT_ID} TESTS
 
 def test_get_instrument(client: TestClient, instrument: Instrument):
     """
@@ -118,7 +118,7 @@ def test_get_instrument_invalid(client: TestClient):
     assert response.status_code == 400
 
 # - - - - - - - - - - - - - - - - - - -
-# UPDATE /INSTRUMENTS/{INSTRUMENT_ID}
+# UPDATE /INSTRUMENTS/{INSTRUMENT_ID} TESTS
 
 def test_update_instrument_currency(client: TestClient, instrument: Instrument):
     """
@@ -212,4 +212,36 @@ def test_update_instrument_invalid_input(client: TestClient, instrument: Instrum
     """
     # Send update request.
     response = client.put("/instruments/1/",json={})
+    assert response.status_code == 400
+
+# - - - - - - - - - - - - - - - - - - -
+# DELETE /INSTRUMENT/{INSTRUMENT_ID} TESTS
+
+def test_delete_instrument(client: TestClient, instrument: Instrument):
+    """
+    Test delete instrument.
+
+    Args:
+        client (TestClient): Test client.
+        instrument (Instrument): Test instrument.
+    """
+    # Send delete request.
+    response = client.delete(f"/instruments/{instrument.id}/")
+    instrument_json = response.json()
+    assert response.status_code == 200
+    assert instrument_json["name"] == instrument.name
+    assert instrument_json["exchange"] == instrument.exchange
+    assert instrument_json["symbol"] == instrument.symbol
+    assert instrument_json["currency"] == instrument.currency
+
+
+def test_delete_instrument_invalid(client: TestClient):
+    """
+    Test delete instrument for invalid instrument.
+
+    Args:
+        client (TestClient): Test client.
+    """
+    # Send delete request.
+    response = client.delete("/instruments/1")
     assert response.status_code == 400

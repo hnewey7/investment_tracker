@@ -156,3 +156,33 @@ def update_instrument(*, session: SessionDep, instrument_id: int, data: Instrume
         instrument = crud.update_instrument_prices(session=session,instrument=instrument,open=data.prices[0],high=data.prices[1],low=data.prices[2],close=data.prices[3])
 
     return instrument
+
+# - - - - - - - - - - - - - - - - - - -
+# DELETE /INSTRUMENTS/{INSTRUMENT_ID}
+
+@router.delete(
+    "/{instrument_id}/",
+    response_model=Instrument
+)
+def delete_instrument(*, session: SessionDep, instrument_id: int) -> Instrument:
+    """
+    Delete instrument.
+
+    Args:
+        session (SessionDep): SQL session.
+        instrument_id (int): Instrument id.
+
+    Returns:
+        Instrument: Deleted instrument.
+    """
+    # Get instrument.
+    instrument = crud.get_instrument_by_id(session=session, id=instrument_id)
+    if not instrument:
+        raise HTTPException(
+            status_code=400,
+            detail="No instrument exists with instrument id."
+        )
+    
+    # Delete instrument.
+    crud.delete_instrument(session=session, instrument=instrument)
+    return instrument
