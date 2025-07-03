@@ -6,8 +6,9 @@ Created on 02-07-2025
 
 '''
 from fastapi import APIRouter, HTTPException
+from sqlmodel import select, func
 
-from app.models import InstrumentBase, Instrument
+from app.models import InstrumentBase, Instrument, InstrumentsPublic
 from app.api.deps import SessionDep
 from app import crud
 
@@ -16,6 +17,46 @@ from app import crud
 router = APIRouter(prefix="/instruments",tags=["instruments"])
 
 # - - - - - - - - - - - - - - - - - - -
+# GET /INSTRUMENT
+
+@router.get(
+    "/",
+    response_model=InstrumentsPublic
+)
+def get_instruments(*, session: SessionDep, name: str=None, exchange: str=None, symbol: str=None, currency: str=None) -> InstrumentsPublic:
+    """
+    Get all instruments.
+
+    Args:
+        session (SessionDep): SQL session.
+        name (str, optional): Name of instrument. Defaults to None.
+        exchange (str, optional): Exchange. Defaults to None.
+        symbol (str, optional): Symbol. Defaults to None.
+        currency (str, optional): Currency. Defaults to None.
+
+    Returns:
+        InstrumentsPublic: List of instruments.
+    """
+    # Counts all instruments, independent of what instruments returned.
+    count_statement = select(func.count()).select_from(Instrument)
+    count = session.exec(count_statement).one()
+
+    # Filtering instruments.
+    statement = select(Instrument)
+    if name: 
+        statement = statement.where(Instrument.name == name)
+    elif exchange:
+        statement = statement.where(Instrument.exchange == exchange)
+    elif symbol:
+        statement = statement.where(Instrument.symbol == symbol)
+    elif currency:
+        statement = statement.where(Instrument.currency == currency)
+    instruments = session.exec(statement).all()
+
+    return InstrumentsPublic(data=instruments, count=count)
+
+# - - - - - - - - - - - - - - - - - - -
+# POST /INSTRUMENT
 
 @router.post(
     "/",

@@ -66,6 +66,11 @@ class Instrument(InstrumentBase, table=True):
     low: float | None
     close: float | None
 
+
+class InstrumentsPublic(SQLModel):
+    data: list[Instrument]
+    count: int
+
 # - - - - - - - - - - - - - - - - - - -
 
 class AssetBase(SQLModel):
