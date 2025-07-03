@@ -10,10 +10,12 @@ from fastapi import APIRouter, HTTPException
 from app.models import Portfolio
 from app.api.deps import SessionDep
 from app import crud
+from app.api.routes import assets
 
 # - - - - - - - - - - - - - - - - - - -
 
 router = APIRouter()
+router.include_router(assets.router, prefix="/assets", tags=["assets"])
 
 # - - - - - - - - - - - - - - - - - - -
 # GET /USERS/{USER_ID}/PORTFOLIO

@@ -481,7 +481,7 @@ def test_create_asset(db:Session,portfolio:Portfolio,instrument:Instrument):
     """
     # Properties.
     asset_properties = {
-        "buy_date":datetime.now(),
+        "buy_date":datetime.now().strftime("%d/%m/%Y"),
         "buy_price":1,
         "volume":1
     }

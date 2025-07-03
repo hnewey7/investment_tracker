@@ -85,20 +85,24 @@ class InstrumentUpdate(SQLModel):
 # - - - - - - - - - - - - - - - - - - -
 
 class AssetBase(SQLModel):
-    buy_date: datetime
+    buy_date: str
     buy_price: float
     volume: float
-    currency: str = Field(max_length=5)
 
 
 class Asset(AssetBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
+    currency: str = Field(max_length=5)
 
     instrument_id: int = Field(index=True,foreign_key="instrument.id")
     instrument: Instrument = Relationship()
 
     portfolio_id: int = Field(index=True,foreign_key="portfolio.id")
     portfolio: Portfolio = Relationship(back_populates="assets")
+
+
+class AssetCreate(AssetBase):
+    instrument_id: int
 
 # - - - - - - - - - - - - - - - - - - -
 
