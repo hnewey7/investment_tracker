@@ -409,7 +409,7 @@ def test_update_instrument_price(db: Session):
         "low": 3,
         "close": 4
     }
-    db_obj = crud.update_price(session=db,instrument=instrument,**update_prices)
+    db_obj = crud.update_instrument_prices(session=db,instrument=instrument,**update_prices)
 
     # Check prices.
     assert db_obj.open == update_prices["open"]
@@ -437,7 +437,7 @@ def test_update_instrument_currency(db: Session):
     instrument = crud.create_instrument(session=db,**properties)
 
     # Update currency.
-    db_obj = crud.update_currency(session=db,instrument=instrument,currency="GBP")
+    db_obj = crud.update_instrument_currency(session=db,instrument=instrument,currency="GBP")
     assert db_obj.currency == "GBP"
     assert db_obj == instrument
 

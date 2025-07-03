@@ -8,7 +8,7 @@ Created on 02-07-2025
 from fastapi import APIRouter, HTTPException
 from sqlmodel import select, func
 
-from app.models import InstrumentBase, Instrument, InstrumentsPublic
+from app.models import InstrumentBase, Instrument, InstrumentsPublic, InstrumentUpdate
 from app.api.deps import SessionDep
 from app import crud
 
@@ -62,13 +62,16 @@ def get_instruments(*, session: SessionDep, name: str=None, exchange: str=None, 
     "/",
     response_model=Instrument
 )
-def create_instrument(*, session: SessionDep, instrument_in: InstrumentBase):
+def create_instrument(*, session: SessionDep, instrument_in: InstrumentBase) -> Instrument:
     """
     Create an instrument.
 
     Args:
         session (SessionDep): SQL session.
         instrument_in (InstrumentBase): Instrument to create.
+
+    Returns:
+        Instrument: Instrument
     """
     instrument = crud.get_instrument_by_symbol(session=session, symbol=instrument_in.symbol)
     if instrument:
@@ -90,16 +93,19 @@ def create_instrument(*, session: SessionDep, instrument_in: InstrumentBase):
 # GET /INSTRUMENTS/{INSTRUMENT_ID}
 
 @router.get(
-    "/{instrument_id}",
+    "/{instrument_id}/",
     response_model=Instrument
 )
-def get_instrument(*, session: SessionDep, instrument_id: int):
+def get_instrument(*, session: SessionDep, instrument_id: int) -> Instrument:
     """
     Get instrument.
 
     Args:
         session (SessionDep): SQL session.
         instrument_id (int): Instrument ID.
+
+    Returns:
+        Instrument: Instrument.
     """
     # Get instrument.
     instrument = crud.get_instrument_by_id(session=session, id=instrument_id)
@@ -108,4 +114,45 @@ def get_instrument(*, session: SessionDep, instrument_id: int):
             status_code=400,
             detail="No instrument exists with instrument id."
         )
+    return instrument
+
+# - - - - - - - - - - - - - - - - - - -
+# UPDATE /INSTRUMENTS/{INSTRUMENT_ID}
+
+@router.put(
+    "/{instrument_id}/",
+    response_model=Instrument
+)
+def update_instrument(*, session: SessionDep, instrument_id: int, data: InstrumentUpdate) -> Instrument:
+    """
+    Update instrument.
+
+    Args:
+        session (SessionDep): SQL session.
+        instrument_id (int): Instrument id.
+        data (InstrumentUpdate): Instrument update.
+
+    Returns:
+        Instrument: Update instrument.
+    """
+    # Get instrument.
+    instrument = crud.get_instrument_by_id(session=session, id=instrument_id)
+    if not instrument:
+        raise HTTPException(
+            status_code=400,
+            detail="No instrument exists with instrument id."
+        )
+    
+    if not data.currency and not data.prices:
+        raise HTTPException(
+            status_code=400,
+            detail="No instrument details to update."
+        )
+
+    if data.currency:
+        instrument = crud.update_instrument_currency(session=session, instrument=instrument, currency=data.currency)
+
+    if data.prices:
+        instrument = crud.update_instrument_prices(session=session,instrument=instrument,open=data.prices[0],high=data.prices[1],low=data.prices[2],close=data.prices[3])
+
     return instrument

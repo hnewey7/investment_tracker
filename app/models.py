@@ -6,6 +6,7 @@ Created on 21-06-2025
 
 '''
 from datetime import datetime
+from typing import Optional, List
 
 from pydantic import EmailStr
 from sqlmodel import SQLModel, Field, Relationship
@@ -70,6 +71,11 @@ class Instrument(InstrumentBase, table=True):
 class InstrumentsPublic(SQLModel):
     data: list[Instrument]
     count: int
+
+
+class InstrumentUpdate(SQLModel):
+    currency: Optional[str] = None
+    prices: Optional[List[float]] = None
 
 # - - - - - - - - - - - - - - - - - - -
 

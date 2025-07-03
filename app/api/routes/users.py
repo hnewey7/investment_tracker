@@ -82,7 +82,7 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> User:
 # /USERS/{USER_ID} ENDPOINT
 
 @router.get(
-    "/{user_id}",
+    "/{user_id}/",
     response_model=UserPublic
 )
 def get_user_by_id(*, session: SessionDep, user_id: int):
@@ -103,7 +103,7 @@ def get_user_by_id(*, session: SessionDep, user_id: int):
 
 
 @router.put(
-    "/{user_id}",
+    "/{user_id}/",
     response_model = UserPublic
 )
 def update_user(*, session: SessionDep, user_id: int, username: str = None, password: str = None) -> User:
@@ -137,7 +137,7 @@ def update_user(*, session: SessionDep, user_id: int, username: str = None, pass
 
 
 @router.delete(
-    "/{user_id}",
+    "/{user_id}/",
     response_model=UserPublic
 )
 def delete_user(*, session: SessionDep, user_id: int):

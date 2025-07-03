@@ -251,9 +251,9 @@ def get_instrument_by_id(*, session: Session, id: int) -> Instrument:
     return session_instrument
 
 
-def update_price(*, session: Session, instrument: Instrument, open: float, high: float, low: float, close: float) -> Instrument:
+def update_instrument_prices(*, session: Session, instrument: Instrument, open: float, high: float, low: float, close: float) -> Instrument:
     """
-    Update price of an instrument.
+    Update prices of an instrument.
 
     Args:
         session (Session): SQL session.
@@ -277,7 +277,7 @@ def update_price(*, session: Session, instrument: Instrument, open: float, high:
     return instrument
 
 
-def update_currency(*, session: Session, instrument: Instrument, currency: str) -> Instrument:
+def update_instrument_currency(*, session: Session, instrument: Instrument, currency: str) -> Instrument:
     """
     Update currency of instrument.
 
