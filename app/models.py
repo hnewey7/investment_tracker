@@ -36,6 +36,11 @@ class UsersPublic(SQLModel):
     data: list[UserPublic]
     count: int
 
+
+class UserUpdate(SQLModel):
+    username: Optional[str] = None
+    password: Optional[str] = None
+
 # - - - - - - - - - - - - - - - - - - -
 
 class PortfolioBase(SQLModel):

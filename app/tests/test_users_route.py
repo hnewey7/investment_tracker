@@ -201,7 +201,7 @@ def test_update_username(client: TestClient, user: User):
     new_username = random_lower_string()
 
     # Send put request.
-    response = client.put(f"/users/{user.id}",params={
+    response = client.put(f"/users/{user.id}",json={
         "username":new_username
     })
     user_response = response.json()
@@ -224,7 +224,7 @@ def test_update_password(client: TestClient, db: Session, user: User):
     new_password = random_lower_string()
 
     # Send put request.
-    response = client.put(f"/users/{user.id}",params={
+    response = client.put(f"/users/{user.id}",json={
         "password":new_password
     })
     assert response.status_code == 200
@@ -245,7 +245,7 @@ def test_update_username_and_password(client: TestClient, db: Session, user: Use
     new_password = random_lower_string()
 
     # Send put request.
-    response = client.put(f"/users/{user.id}",params={
+    response = client.put(f"/users/{user.id}",json={
         "username": new_username,
         "password": new_password
     })

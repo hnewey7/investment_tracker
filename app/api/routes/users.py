@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import select, func
 
 from app import crud
-from app.models import UserCreate, UserPublic, User, UsersPublic
+from app.models import UserCreate, UserPublic, User, UsersPublic, UserUpdate
 from app.api.deps import SessionDep
 from app.api.routes import portfolio
 
@@ -106,32 +106,31 @@ def get_user_by_id(*, session: SessionDep, user_id: int):
     "/{user_id}/",
     response_model = UserPublic
 )
-def update_user(*, session: SessionDep, user_id: int, username: str = None, password: str = None) -> User:
+def update_user(*, session: SessionDep, user_id: int, data: UserUpdate) -> User:
     """
     Update user by user id.
 
     Args:
         session (SessionDep): SQL session.
-        username (str, optional): New username. Defaults to None.
-        password (str, optional): New password. Defaults to None.
+        data (UserUpdate): Updated details.
 
     Returns:
-        User: _description_
+        User: Updated user.
     """
     # Get user to update.
     user = crud.get_user_by_id(session=session,id=user_id)
 
-    if not username and not password:
+    if not data.username and not data.password:
         raise HTTPException(
             status_code=400,
             detail="No user details to update."
         )
     
-    if username:
-        updated_user = crud.change_username(session=session,email=user.email,new_username=username)
+    if data.username:
+        updated_user = crud.change_username(session=session,email=user.email,new_username=data.username)
 
-    if password:
-        updated_user = crud.change_password(session=session,email=user.email,new_password=password)
+    if data.password:
+        updated_user = crud.change_password(session=session,email=user.email,new_password=data.password)
 
     return updated_user
 
