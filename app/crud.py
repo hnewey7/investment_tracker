@@ -310,7 +310,7 @@ def delete_instrument(*, session: Session, instrument: Instrument):
 # - - - - - - - - - - - - - - - - - - -
 # ASSET OPERATIONS
 
-def create_asset(*, session: Session, portfolio: Portfolio, instrument: Instrument ,buy_date: datetime, buy_price: float, volume: float) -> Asset:
+def create_asset(*, session: Session, portfolio: Portfolio, instrument: Instrument ,buy_date: str, buy_price: float, volume: float) -> Asset:
     """
     Create asset.
 
@@ -318,7 +318,7 @@ def create_asset(*, session: Session, portfolio: Portfolio, instrument: Instrume
         session (Session): SQL session.
         portfolio (Portfolio): Portfolio.
         instrument (Instrument): Instrument.
-        buy_date (datetime): Buy date.
+        buy_date (str): Buy date.
         buy_price (float): Buy price.
         volume (float): Volume
 
@@ -349,6 +349,19 @@ def get_assets_by_instrument(*, session: Session, portfolio: Portfolio, instrume
         instrument (Instrument): _description_
     """
     statement = select(Asset).where(Asset.portfolio_id == portfolio.id).where(Asset.instrument_id == instrument.id)
+    results = session.exec(statement).all()
+    return results
+
+
+def get_assets_by_portfolio(*, session: Session, portfolio: Portfolio):
+    """
+    Get assets by portfolio.
+
+    Args:
+        session (Session): SQL session.
+        portfolio (Portfolio): User portfolio.
+    """
+    statement = select(Asset).where(Asset.portfolio_id == portfolio.id)
     results = session.exec(statement).all()
     return results
 
