@@ -109,6 +109,11 @@ class AssetsPublic(SQLModel):
 class AssetCreate(AssetBase):
     instrument_id: int
 
+
+class AssetUpdate(SQLModel):
+    buy_price: Optional[float] = None
+    volume: Optional[float] = None
+
 # - - - - - - - - - - - - - - - - - - -
 
 class PreviousTradeBase(AssetBase):

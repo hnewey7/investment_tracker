@@ -240,3 +240,52 @@ def test_get_asset_invalid_asset(client: TestClient, portfolio: Portfolio, instr
     # Send get request.
     response = client.get(f"/users/{portfolio.user_id}/portfolio/assets/1")
     assert response.status_code == 400
+
+# - - - - - - - - - - - - - - - - - - -
+# UPDATE /USERS/{USER_ID}/PORTFOLIO/ASSETS/{ASSET_ID} TESTS
+
+def test_update_asset(client: TestClient, portfolio: Portfolio, instrument: Instrument):
+    """
+    Test updating asset.
+
+    Args:
+        client (TestClient): Test client.
+        portfolio (Portfolio): Test portfolio.
+        instrument (Instrument): Test instrument.
+    """
+    # Create asset.
+    response = client.post(f"/users/{portfolio.user_id}/portfolio/assets", json={
+        "buy_date":datetime.now().strftime("%d/%m/%Y"),
+        "buy_price":1,
+        "volume":1,
+        "instrument_id":instrument.id
+    })
+    response_json = response.json()
+    
+    # Send put request for updating buy price.
+    new_buy_price = 2
+    response = client.put(f"/users/{portfolio.user_id}/portfolio/assets/{response_json['id']}",json={
+        "buy_price":new_buy_price
+    })
+    updated_asset_json = response.json()
+    assert response.status_code == 200
+    assert updated_asset_json["buy_price"] == new_buy_price
+
+    # Send put request for updating volume.
+    new_volume = 2
+    response = client.put(f"/users/{portfolio.user_id}/portfolio/assets/{response_json['id']}",json={
+        "volume":new_volume
+    })
+    updated_asset_json = response.json()
+    assert response.status_code == 200
+    assert updated_asset_json["volume"] == new_volume
+
+    # Send put request for updating both buy price and volume.
+    response = client.put(f"/users/{portfolio.user_id}/portfolio/assets/{response_json['id']}",json={
+        "buy_price":1,
+        "volume":1
+    })
+    updated_asset_json = response.json()
+    assert response.status_code == 200
+    assert updated_asset_json["buy_price"] == 1
+    assert updated_asset_json["volume"] == 1
