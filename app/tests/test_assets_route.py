@@ -289,3 +289,30 @@ def test_update_asset(client: TestClient, portfolio: Portfolio, instrument: Inst
     assert response.status_code == 200
     assert updated_asset_json["buy_price"] == 1
     assert updated_asset_json["volume"] == 1
+
+# - - - - - - - - - - - - - - - - - - -
+# DELETE /USERS/{USER_ID}/PORTFOLIO/ASSETS/{ASSET_ID} TESTS
+
+def test_delete_asset(client: TestClient, portfolio: Portfolio, instrument: Instrument):
+    """
+    Test delete asset.
+
+    Args:
+        client (TestClient): Test client.
+        portfolio (Portfolio): Test portfolio.
+        instrument (Instrument): Test instrument.
+    """
+    # Create asset.
+    response = client.post(f"/users/{portfolio.user_id}/portfolio/assets", json={
+        "buy_date":datetime.now().strftime("%d/%m/%Y"),
+        "buy_price":1,
+        "volume":1,
+        "instrument_id":instrument.id
+    })
+    response_json = response.json()
+
+    # Send delete request.
+    response = client.delete(f"/users/{portfolio.user_id}/portfolio/assets/{response_json['id']}")
+    asset_json = response.json()
+    assert response.status_code == 200
+    assert asset_json["id"] == response_json["id"]
