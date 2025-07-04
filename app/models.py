@@ -101,6 +101,11 @@ class Asset(AssetBase, table=True):
     portfolio: Portfolio = Relationship(back_populates="assets")
 
 
+class AssetsPublic(SQLModel):
+    data: list[Asset]
+    count: int
+
+
 class AssetCreate(AssetBase):
     instrument_id: int
 

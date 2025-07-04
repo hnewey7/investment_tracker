@@ -9,7 +9,7 @@ from datetime import datetime
 
 from fastapi.testclient import TestClient
 
-from app.models import Portfolio, Instrument
+from app.models import Portfolio, Instrument, User
 
 # - - - - - - - - - - - - - - - - - - -
 # CREATE /USERS/{USER_ID}/PORTFOLIO/ASSETS TESTS
@@ -36,3 +36,56 @@ def test_create_asset(client: TestClient, portfolio: Portfolio, instrument: Inst
     assert asset_json["portfolio_id"] == portfolio.id
     assert asset_json["buy_price"] == 1
     assert asset_json["volume"] == 1
+
+
+def test_create_asset_invalid_user(client: TestClient):
+    """
+    Test create asset for an invalid user.
+
+    Args:
+        client (TestClient): SQL session.
+    """
+    # Send post request.
+    response = client.post(f"/users/1/portfolio/assets/", json={
+        "buy_date":datetime.now().strftime("%d/%m/%Y"),
+        "buy_price":1,
+        "volume":1,
+        "instrument_id":1
+    })
+    assert response.status_code == 400
+
+
+def test_create_asset_invalid_portfolio(client: TestClient, user: User):
+    """
+    Test create asset for invalid portfolio.
+
+    Args:
+        client (TestClient): Test client.
+        user (User): Test user.
+    """
+    # Send post request.
+    response = client.post(f"/users/{user.id}/portfolio/assets/",json={
+        "buy_date":datetime.now().strftime("%d/%m/%Y"),
+        "buy_price":1,
+        "volume":1,
+        "instrument_id":1
+    })
+    assert response.status_code == 400
+
+
+def test_create_asset_invalid_instrument(client: TestClient, portfolio: Portfolio):
+    """
+    Test create asset for invalid instrument.
+
+    Args:
+        client (TestClient): Test client.
+        portfolio (Portfolio): Test portfolio.
+    """
+    # Send post request.
+    response = client.post(f"/users/{portfolio.user_id}/portfolio/assets/",json={
+        "buy_date":datetime.now().strftime("%d/%m/%Y"),
+        "buy_price":1,
+        "volume":1,
+        "instrument_id":1
+    })
+    assert response.status_code == 400
