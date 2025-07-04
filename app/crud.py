@@ -9,7 +9,7 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from app.models import User, UserCreate, Portfolio, Instrument, Asset, PreviousTrade
+from app.models import User, UserCreate, Portfolio, Instrument, Asset, PreviousTrade, AssetsPublic
 from app.core.security import get_password_hash, verify_password
 
 # - - - - - - - - - - - - - - - - - - -
@@ -412,6 +412,28 @@ def delete_asset(*, session: Session, asset: Asset):
     """
     session.delete(asset)
     session.commit()
+
+
+def delete_assets_from_portfolio(*, session: Session, portfolio: Portfolio) -> AssetsPublic:
+    """
+    Delete assets from portfolio.
+
+    Args:
+        session (Session): SQL session.
+        portfolio (Portfolio): Portfolio.
+
+    Returns:
+        AssetsPublic: Deleted assets.
+    """
+    # Delete each asset.
+    assets = []
+    asset_count = 0
+    for asset in portfolio.assets:
+        assets.append(asset)
+        asset_count += 1
+        delete_asset(session=session, asset=asset)
+    
+    return AssetsPublic(data=assets,count=asset_count)
 
 # - - - - - - - - - - - - - - - - - - -
 # PREVIOUS TRADE OPERATIONS

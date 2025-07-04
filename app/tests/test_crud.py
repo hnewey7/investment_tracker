@@ -600,6 +600,25 @@ def test_delete_asset(db:Session,portfolio:Portfolio,instrument:Instrument):
     db_obj = crud.get_assets_by_instrument(session=db,portfolio=portfolio,instrument=instrument)
     assert len(db_obj) == 0
 
+
+def test_delete_assets(db:Session, portfolio:Portfolio, instrument: Instrument):
+    """
+    Test deleting multiple assets from a portfolio.
+
+    Args:
+        db (Session): SQL session.
+        portfolio (Portfolio): Test portfolio.
+        instrument (Instrument): Test instrument.
+    """
+    # Create assets.
+    for i in range(10):
+        crud.create_asset(session=db, portfolio=portfolio, instrument=instrument, buy_date=datetime.now().strftime("%d/%m/%Y"), buy_price=1, volume=1)
+    assert len(portfolio.assets) == 10
+
+    # Delete assets.
+    crud.delete_assets_from_portfolio(session=db, portfolio=portfolio)
+    assert len(portfolio.assets) == 0
+
 # - - - - - - - - - - - - - - - - - - -
 # PREVIOUS TRADES TESTS
 

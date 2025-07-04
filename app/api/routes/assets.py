@@ -98,3 +98,38 @@ def create_asset(*, session: SessionDep, user_id: int, asset_in: AssetCreate) ->
     # Create asset.
     asset = crud.create_asset(session=session,portfolio=user.portfolio,instrument=instrument,buy_date=asset_in.buy_date,buy_price=asset_in.buy_price,volume=asset_in.volume)
     return asset
+
+# - - - - - - - - - - - - - - - - - - -
+# DELETE /USERS/{USER_ID}/PORTFOLIO/ASSETS
+
+@router.delete(
+    "/",
+    response_model=AssetsPublic
+)
+def delete_assets(*, session: SessionDep, user_id: int) -> AssetsPublic:
+    """
+    Delete all assets in a user's portfolio.
+
+    Args:
+        session (SessionDep): SQL session.
+        user_id (int): User id.
+
+    Returns:
+        AssetsPublic: Deleted assets.
+    """
+    # Get user.
+    user = crud.get_user_by_id(session=session,id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="No user available with user id."
+        )
+    if not user.portfolio:
+        raise HTTPException(
+            status_code=400,
+            detail="User does not have a portfolio, please create a portfolio first."
+        )
+    
+    # Delete assets.
+    assets = crud.delete_assets_from_portfolio(session=session, portfolio=user.portfolio)
+    return assets

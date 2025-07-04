@@ -143,3 +143,60 @@ def test_create_asset_invalid_instrument(client: TestClient, portfolio: Portfoli
         "instrument_id":1
     })
     assert response.status_code == 400
+
+# - - - - - - - - - - - - - - - - - - -
+# DELETE /USERS/{USER_ID}/PORTFOLIO/ASSETS
+
+def test_delete_assets(client: TestClient, db: Session, portfolio: Portfolio, instrument: Instrument):
+    """
+    Test delete assets from portfolio.
+
+    Args:
+        client (TestClient): Test client.
+        db (Session): SQL session.
+        portfolio (Portfolio): Test portfolio.
+        instrument (Instrument): Test instrument.
+    """
+    # Send request to create asset.
+    for i in range(10):
+        response = client.post(f"/users/{portfolio.user_id}/portfolio/assets", json={
+            "buy_date":datetime.now().strftime("%d/%m/%Y"),
+            "buy_price":1,
+            "volume":1,
+            "instrument_id":instrument.id
+        })
+    assets = crud.get_assets_by_portfolio(session=db,portfolio=portfolio)
+    assert len(assets) == 10
+
+    # Send delete request.
+    response = client.delete(f"/users/{portfolio.user_id}/portfolio/assets")
+    deleted_assets_json = response.json()
+    assets = crud.get_assets_by_portfolio(session=db,portfolio=portfolio)
+    assert response.status_code == 200
+    assert len(assets) == 0
+    assert len(deleted_assets_json["data"]) == 10
+
+
+def test_delete_assets_invalid_user(client: TestClient):
+    """
+    Test delete assets for invalid user.
+
+    Args:
+        client (TestClient): Test client.
+    """
+    # Send delete request.
+    response = client.delete("/users/1/portfolio/assets")
+    assert response.status_code == 400
+
+
+def test_delete_assets_invalid_portfolio(client: TestClient, user: User):
+    """
+    Test delete assets for user with invalid portfolio.
+
+    Args:
+        client (TestClient): Test client.
+        user (User): Test user.
+    """
+    # Send delete request.
+    response = client.delete(f"/users/{user.id}/portfolio/assets")
+    assert response.status_code == 400
