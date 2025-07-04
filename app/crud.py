@@ -366,6 +366,22 @@ def get_assets_by_portfolio(*, session: Session, portfolio: Portfolio):
     return results
 
 
+def get_asset_by_id(*, session: Session, asset_id: int) -> Asset | None:
+    """
+    Get asset by id.
+
+    Args:
+        session (Session): SQL session.
+        asset_id (int): Asset id.
+
+    Returns:
+        Asset | None: Returned asset.
+    """
+    statement = select(Asset).where(Asset.id == asset_id)
+    db_obj = session.exec(statement).first()
+    return db_obj
+
+
 def update_asset_buy_price(*, session: Session, asset: Asset, buy_price: float) -> Asset:
     """
     Update buy price of an asset.

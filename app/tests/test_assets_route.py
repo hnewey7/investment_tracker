@@ -200,3 +200,43 @@ def test_delete_assets_invalid_portfolio(client: TestClient, user: User):
     # Send delete request.
     response = client.delete(f"/users/{user.id}/portfolio/assets")
     assert response.status_code == 400
+
+# - - - - - - - - - - - - - - - - - - -
+# GET /USERS/{USER_ID}/PORTFOLIO/ASSETS/{ASSET_ID} TESTS
+
+def test_get_asset(client: TestClient, portfolio: Portfolio, instrument: Instrument):
+    """
+    Test getting an asset.
+
+    Args:
+        client (TestClient): Test client.
+        portfolio (Portfolio): Test portfolio.
+        instrument (Instrument): Test instrument.
+    """
+    # Create asset.
+    response = client.post(f"/users/{portfolio.user_id}/portfolio/assets", json={
+        "buy_date":datetime.now().strftime("%d/%m/%Y"),
+        "buy_price":1,
+        "volume":1,
+        "instrument_id":instrument.id
+    })
+    create_asset_json = response.json()
+    # Send get request.
+    response = client.get(f"/users/{portfolio.user_id}/portfolio/assets/{create_asset_json['id']}")
+    asset_json = response.json()
+    assert response.status_code == 200
+    assert asset_json["id"] == create_asset_json["id"]
+
+
+def test_get_asset_invalid_asset(client: TestClient, portfolio: Portfolio, instrument: Instrument):
+    """
+    Test get asset for invalid asset.
+
+    Args:
+        client (TestClient): Test client.
+        portfolio (Portfolio): Test portfolio.
+        instrument (Instrument): Test instrument.
+    """
+    # Send get request.
+    response = client.get(f"/users/{portfolio.user_id}/portfolio/assets/1")
+    assert response.status_code == 400
