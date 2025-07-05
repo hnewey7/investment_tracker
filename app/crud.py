@@ -496,6 +496,19 @@ def get_trade_by_instrument(*, session:Session, portfolio:Portfolio, instrument:
     return results
 
 
+def get_trades_by_portfolio(*, session: Session, portfolio: Portfolio):
+    """
+    Get trades by portfolio.
+
+    Args:
+        session (Session): SQL session.
+        portfolio (Portfolio): User portfolio.
+    """
+    statement = select(Trade).where(Trade.portfolio_id == portfolio.id)
+    results = session.exec(statement).all()
+    return results
+
+
 def update_trade_sell_price(*, session:Session, trade:Trade, sell_price:float) -> Trade:
     """
     Update trade's sell price.
