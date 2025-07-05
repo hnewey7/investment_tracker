@@ -96,7 +96,7 @@ def asset(portfolio,instrument) -> Generator[Asset, None, None]:
     with Session(engine) as session:
         # Create asset.
         asset_properties = {
-            "buy_date":datetime.now(),
+            "buy_date":datetime.now().strftime("%d/%m/%Y"),
             "buy_price":1,
             "volume":1
         }

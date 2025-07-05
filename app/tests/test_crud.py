@@ -633,11 +633,11 @@ def test_create_trade(db:Session,portfolio:Portfolio,instrument:Instrument):
     """
     # Properties.
     trade_properties = {
-        "sell_date":datetime.now(),
+        "sell_date":datetime.now().strftime("%d/%m/%Y"),
         "sell_price":1
     }
     asset_properties = {
-        "buy_date":datetime.now(),
+        "buy_date":datetime.now().strftime("%d/%m/%Y"),
         "buy_price":1,
         "volume":1
     }
@@ -671,11 +671,11 @@ def test_get_trade_by_instrument(db:Session,portfolio:Portfolio,instrument:Instr
     """
     # Properties.
     trade_properties = {
-        "sell_date":datetime.now(),
+        "sell_date":datetime.now().strftime("%d/%m/%Y"),
         "sell_price":1
     }
     asset_properties = {
-        "buy_date":datetime.now(),
+        "buy_date":datetime.now().strftime("%d/%m/%Y"),
         "buy_price":1,
         "volume":1
     }
@@ -702,11 +702,11 @@ def test_update_trade_sell_price(db:Session,portfolio:Portfolio,instrument:Instr
     """
     # Properties.
     trade_properties = {
-        "sell_date":datetime.now(),
+        "sell_date":datetime.now().strftime("%d/%m/%Y"),
         "sell_price":1,
     }
     asset_properties = {
-        "buy_date":datetime.now(),
+        "buy_date":datetime.now().strftime("%d/%m/%Y"),
         "buy_price":1,
         "volume":1
     }
@@ -734,11 +734,11 @@ def test_delete_trade(db:Session,portfolio:Portfolio,instrument:Instrument):
     """
     # Properties.
     trade_properties = {
-        "sell_date":datetime.now(),
+        "sell_date":datetime.now().strftime("%d/%m/%Y"),
         "sell_price":1,
     }
     asset_properties = {
-        "buy_date":datetime.now(),
+        "buy_date":datetime.now().strftime("%d/%m/%Y"),
         "buy_price":1,
         "volume":1
     }

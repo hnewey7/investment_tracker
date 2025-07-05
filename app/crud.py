@@ -454,14 +454,14 @@ def delete_assets_from_portfolio(*, session: Session, portfolio: Portfolio) -> A
 # - - - - - - - - - - - - - - - - - - -
 # TRADE OPERATIONS
 
-def create_trade(*, session:Session, asset:Asset, sell_date:datetime, sell_price: float) -> Trade:
+def create_trade(*, session:Session, asset:Asset, sell_date:str, sell_price: float) -> Trade:
     """
     Create trade from asset.
 
     Args:
         session (Session): SQL session
         asset (Asset): Asset to create trade from.
-        sell_date (datetime): Sell datetime.
+        sell_date (str): Sell datetime.
         sell_price (float): Sell price.
     
     Returns:

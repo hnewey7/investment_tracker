@@ -117,7 +117,7 @@ class AssetUpdate(SQLModel):
 # - - - - - - - - - - - - - - - - - - -
 
 class TradeBase(AssetBase):
-    sell_date: datetime
+    sell_date: str
     sell_price: float
 
 
@@ -129,5 +129,11 @@ class Trade(TradeBase, table=True):
 
     portfolio_id: int = Field(foreign_key="portfolio.id")
     portfolio: Portfolio = Relationship(back_populates="previous_trades")
+
+
+class TradeCreate(SQLModel):
+    asset_id: int
+    sell_date: str
+    sell_price: float
 
 # - - - - - - - - - - - - - - - - - - -
