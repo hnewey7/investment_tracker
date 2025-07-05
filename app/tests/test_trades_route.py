@@ -38,3 +38,19 @@ def test_create_trade(client: TestClient, db: Session, portfolio: Portfolio, ins
     assert response.status_code == 200
     assert trade_json["instrument_id"] == instrument.id
     assert trade_json["portfolio_id"] == portfolio.id
+
+
+def test_create_trade_invalid_asset(client: TestClient):
+    """
+    Test creating trade with invalid asset.
+
+    Args:
+        client (TestClient): Test client.
+    """
+    # Send post request.
+    response = client.post(f"/users/1/portfolio/trades", json={
+        "asset_id": 1,
+        "sell_date": datetime.now().strftime("%d/%m/%Y"),
+        "sell_price": 1
+    })
+    assert response.status_code == 400
