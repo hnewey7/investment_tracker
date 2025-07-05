@@ -9,7 +9,7 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from app.models import User, UserCreate, Portfolio, Instrument, Asset, PreviousTrade, AssetsPublic
+from app.models import User, UserCreate, Portfolio, Instrument, Asset, Trade, AssetsPublic
 from app.core.security import get_password_hash, verify_password
 
 # - - - - - - - - - - - - - - - - - - -
@@ -452,22 +452,22 @@ def delete_assets_from_portfolio(*, session: Session, portfolio: Portfolio) -> A
     return AssetsPublic(data=assets,count=asset_count)
 
 # - - - - - - - - - - - - - - - - - - -
-# PREVIOUS TRADE OPERATIONS
+# TRADE OPERATIONS
 
-def create_previous_trade(*, session:Session, asset:Asset, sell_date:datetime, sell_price: float) -> PreviousTrade:
+def create_trade(*, session:Session, asset:Asset, sell_date:datetime, sell_price: float) -> Trade:
     """
-    Create previous trade from asset.
+    Create trade from asset.
 
     Args:
         session (Session): SQL session
-        asset (Asset): Asset to create previous trade from.
+        asset (Asset): Asset to create trade from.
         sell_date (datetime): Sell datetime.
         sell_price (float): Sell price.
     
     Returns:
-        PreviousTrade: New previous trade.
+        Trade: New trade.
     """
-    db_obj = PreviousTrade.model_validate(asset,
+    db_obj = Trade.model_validate(asset,
         update={
             "sell_date":sell_date,
             "sell_price":sell_price
@@ -479,9 +479,9 @@ def create_previous_trade(*, session:Session, asset:Asset, sell_date:datetime, s
     return db_obj
 
 
-def get_previous_trade_by_instrument(*, session:Session, portfolio:Portfolio, instrument:Instrument) -> PreviousTrade:
+def get_trade_by_instrument(*, session:Session, portfolio:Portfolio, instrument:Instrument) -> Trade:
     """
-    Get previous trade by instrument for a given portfolio.
+    Get trade by instrument for a given portfolio.
 
     Args:
         session (Session): SQL session.
@@ -489,38 +489,38 @@ def get_previous_trade_by_instrument(*, session:Session, portfolio:Portfolio, in
         instrumnet (Instrument): Instrument.
 
     Returns:
-        PreviousTrade: Previous trade.
+        Trade: Trade.
     """
-    statement = select(PreviousTrade).where(PreviousTrade.portfolio_id == portfolio.id).where(PreviousTrade.instrument_id == instrument.id)
+    statement = select(Trade).where(Trade.portfolio_id == portfolio.id).where(Trade.instrument_id == instrument.id)
     results = session.exec(statement).all()
     return results
 
 
-def update_previous_trade_sell_price(*, session:Session, previous_trade:PreviousTrade, sell_price:float) -> PreviousTrade:
+def update_trade_sell_price(*, session:Session, trade:Trade, sell_price:float) -> Trade:
     """
-    Update previous trade's sell price.
+    Update trade's sell price.
 
     Args:
         session (Session): SQL session.
-        previous_trade (PreviousTrade): Previous trade.
+        trade (sTrade): Trade.
         sell_price (float): Sell price.
 
     Returns:
-        PreviousTrade: Previous trade.
+        Trade: Trade.
     """
-    previous_trade.sell_price = sell_price
+    trade.sell_price = sell_price
     session.commit()
-    session.refresh(previous_trade)
-    return previous_trade
+    session.refresh(trade)
+    return trade
 
 
-def delete_previous_trade(*, session:Session, previous_trade:PreviousTrade):
+def delete_trade(*, session:Session, trade:Trade):
     """
-    Delete previous trade.
+    Delete trade.
 
     Args:
         session (Session): SQL session.
-        previous_trade (PreviousTrade): Previous trade.
+        trade (Trade): Trade.
     """
-    session.delete(previous_trade)
+    session.delete(trade)
     session.commit()

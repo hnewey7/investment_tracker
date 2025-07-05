@@ -54,7 +54,7 @@ class Portfolio(PortfolioBase, table=True):
     user: User = Relationship(back_populates="portfolio")
 
     assets: list["Asset"] = Relationship(back_populates="portfolio")
-    previous_trades: list["PreviousTrade"] = Relationship(back_populates="portfolio")
+    previous_trades: list["Trade"] = Relationship(back_populates="portfolio")
 
 # - - - - - - - - - - - - - - - - - - -
 
@@ -116,12 +116,12 @@ class AssetUpdate(SQLModel):
 
 # - - - - - - - - - - - - - - - - - - -
 
-class PreviousTradeBase(AssetBase):
+class TradeBase(AssetBase):
     sell_date: datetime
     sell_price: float
 
 
-class PreviousTrade(PreviousTradeBase, table=True):
+class Trade(TradeBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
     instrument_id: int = Field(foreign_key="instrument.id")
