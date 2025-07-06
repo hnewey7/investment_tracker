@@ -15,7 +15,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.core.db import engine, create_db_and_tables, clear_db
 from app.core.config import test_settings
-from app.models import User, UserCreate, Instrument, Portfolio, Asset, Trade
+from app.models import User, UserCreate, Instrument
 from app.tests.utils.utils import random_email, random_lower_string
 from app import crud
 
@@ -70,14 +70,6 @@ def multiple_users(request) -> Generator[list[User], None, None]:
 
 
 @pytest.fixture(scope="function")
-def portfolio(user) -> Generator[Portfolio, None, None]:
-    with Session(engine) as session:
-        # Create portfolio.
-        portfolio = crud.create_portfolio(session=session,user=user)
-    yield portfolio
-
-
-@pytest.fixture(scope="function")
 def instrument() -> Generator[Instrument, None, None]:
     with Session(engine) as session:
         # Create instrument.
@@ -89,16 +81,3 @@ def instrument() -> Generator[Instrument, None, None]:
         }
         instrument = crud.create_instrument(session=session,**properties)
     yield instrument
-
-
-@pytest.fixture(scope="function")
-def asset(portfolio,instrument) -> Generator[Asset, None, None]:
-    with Session(engine) as session:
-        # Create asset.
-        asset_properties = {
-            "buy_date":datetime.now().strftime("%d/%m/%Y"),
-            "buy_price":1,
-            "volume":1
-        }
-        asset = crud.create_asset(session=session,portfolio=portfolio,instrument=instrument,**asset_properties)
-    yield asset

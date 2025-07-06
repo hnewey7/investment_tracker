@@ -19,7 +19,7 @@ def test_db(db: Session):
         db (Session): Database fixture.
     """
     # Correct table names.
-    table_names = ["user","portfolio","instrument","trade"]
+    table_names = ["user","instrument","order"]
 
     # Available tables.
     available_tables = SQLModel.metadata.tables.keys()

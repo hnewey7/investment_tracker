@@ -20,7 +20,7 @@ class UserBase(SQLModel):
 
 class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    portfolio: "Portfolio" = Relationship(back_populates="user")
+    orders: list["Order"] = Relationship(back_populates="user")
     hashed_password: str
 
 
@@ -40,21 +40,6 @@ class UsersPublic(SQLModel):
 class UserUpdate(SQLModel):
     username: Optional[str] = None
     password: Optional[str] = None
-
-# - - - - - - - - - - - - - - - - - - -
-
-class PortfolioBase(SQLModel):
-    type: str = Field(default="Overview",max_length=255)
-
-
-class Portfolio(PortfolioBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-
-    user_id: int = Field(foreign_key="user.id")
-    user: User = Relationship(back_populates="portfolio")
-
-    assets: list["Asset"] = Relationship(back_populates="portfolio")
-    previous_trades: list["Trade"] = Relationship(back_populates="portfolio")
 
 # - - - - - - - - - - - - - - - - - - -
 
@@ -84,56 +69,20 @@ class InstrumentUpdate(SQLModel):
 
 # - - - - - - - - - - - - - - - - - - -
 
-class AssetBase(SQLModel):
-    buy_date: str
-    buy_price: float
+class OrderBase(SQLModel):
+    date: str
     volume: float
+    price: float
+    type: str
+    
 
-
-class Asset(AssetBase, table=True):
+class Order(OrderBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    currency: str = Field(max_length=5)
 
     instrument_id: int = Field(index=True,foreign_key="instrument.id")
     instrument: Instrument = Relationship()
 
-    portfolio_id: int = Field(index=True,foreign_key="portfolio.id")
-    portfolio: Portfolio = Relationship(back_populates="assets")
+    user_id: int = Field(index=True,foreign_key="user.id")
+    user: User = Relationship(back_populates="orders")
 
-
-class AssetsPublic(SQLModel):
-    data: list[Asset]
-    count: int
-
-
-class AssetCreate(AssetBase):
-    instrument_id: int
-
-
-class AssetUpdate(SQLModel):
-    buy_price: Optional[float] = None
-    volume: Optional[float] = None
-
-# - - - - - - - - - - - - - - - - - - -
-
-class TradeBase(AssetBase):
-    sell_date: str
-    sell_price: float
-
-
-class Trade(TradeBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-
-    instrument_id: int = Field(foreign_key="instrument.id")
-    instrument: Instrument = Relationship()
-
-    portfolio_id: int = Field(foreign_key="portfolio.id")
-    portfolio: Portfolio = Relationship(back_populates="previous_trades")
-
-
-class TradeCreate(SQLModel):
-    asset_id: int
-    sell_date: str
-    sell_price: float
-
-# - - - - - - - - - - - - - - - - - - -
+# # - - - - - - - - - - - - - - - - - - -

@@ -13,12 +13,9 @@ from sqlmodel import select, func
 from app import crud
 from app.models import UserCreate, UserPublic, User, UsersPublic, UserUpdate
 from app.api.deps import SessionDep
-from app.api.routes import portfolio
-
 # - - - - - - - - - - - - - - - - - - -
 
 router = APIRouter(prefix="/users",tags=["users"])
-router.include_router(portfolio.router, prefix="/{user_id}/portfolio", tags=["portfolio"])
 
 # - - - - - - - - - - - - - - - - - - -
 # /USERS ENDPOINT
