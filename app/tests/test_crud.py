@@ -693,3 +693,31 @@ def test_update_order_instrument(db: Session, user: User, multiple_instruments: 
     order_update = OrderUpdate(instrument_id=2)
     updated_order = crud.update_order(session=db, order=test_order, order_update=order_update)
     assert updated_order.instrument == multiple_instruments[1]
+
+
+def test_delete_order(db: Session, user: User, instrument: Instrument):
+    """
+    Test delete order.
+
+    Args:
+        db (Session): SQL session.
+        user (User): Test user.
+        instrument (Instrument): Test instrument.
+    """
+    # Properties.
+    properties = {
+        "volume": 1,
+        "price": 1,
+        "type": "BUY",
+        "user_id": user.id,
+        "instrument_id": instrument.id
+    }
+
+    # Create order.
+    order_create = OrderCreate(date=datetime.now(),**properties)
+    test_order = crud.create_order(session=db, order_create=order_create)
+    assert crud.get_order_by_id(session=db, order_id=test_order.id)
+
+    # Delete order.
+    crud.delete_order(session=db, order=test_order)
+    assert not crud.get_order_by_id(session=db, order_id=test_order.id)

@@ -403,3 +403,16 @@ def update_order(*, session: Session, order: Order, order_update: OrderUpdate) -
     session.commit()
     session.refresh(order)
     return order
+
+
+def delete_order(*, session: Session, order: Order) -> None:
+    """
+    Delete order.
+
+    Args:
+        session (Session): SQL session.
+        order (Order): Order to delete.
+    """
+    session.delete(order)
+    session.commit()
+    
