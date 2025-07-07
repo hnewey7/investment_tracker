@@ -29,7 +29,7 @@ def test_get_orders(client: TestClient, db: Session, multiple_users: list[User],
     """
     # Properties.
     properties = {
-        "date": datetime.now(),
+        "date": datetime.now().strftime("%d/%m/%Y"),
         "volume": 1,
         "price": 1,
         "type": "BUY",
@@ -37,10 +37,10 @@ def test_get_orders(client: TestClient, db: Session, multiple_users: list[User],
     }
 
     # Create orders.
-    order_create_1 = OrderCreate(user_id=1,**properties)
-    order_create_2 = OrderCreate(user_id=2,**properties)
-    crud.create_order(session=db, order_create=order_create_1)
-    crud.create_order(session=db, order_create=order_create_2)
+    order_create_1 = OrderCreate(**properties)
+    order_create_2 = OrderCreate(**properties)
+    crud.create_order(session=db, user_id=1, order_create=order_create_1)
+    crud.create_order(session=db, user_id=2, order_create=order_create_2)
 
     # Send get request.
     response = client.get("/users/1/orders")
@@ -62,18 +62,17 @@ def test_get_orders_by_instrument(client: TestClient, db: Session, user: User, m
     """
     # Properties.
     properties = {
-        "date": datetime.now(),
+        "date": datetime.now().strftime("%d/%m/%Y"),
         "volume": 1,
         "price": 1,
-        "type": "BUY",
-        "user_id": user.id,
+        "type": "BUY"
     }
 
     # Create orders.
     order_create_1 = OrderCreate(instrument_id=1,**properties)
     order_create_2 = OrderCreate(instrument_id=2,**properties)
-    crud.create_order(session=db, order_create=order_create_1)
-    crud.create_order(session=db, order_create=order_create_2)
+    crud.create_order(session=db, user_id=user.id, order_create=order_create_1)
+    crud.create_order(session=db, user_id=user.id, order_create=order_create_2)
 
     # Send get request.
     response = client.get("/users/1/orders",params={
@@ -99,15 +98,14 @@ def test_get_orders_by_date(client: TestClient, db: Session, user: User, instrum
         "volume": 1,
         "price": 1,
         "type": "BUY",
-        "user_id": user.id,
         "instrument_id": instrument.id
     }
 
     # Create orders.
-    order_create_1 = OrderCreate(date=datetime.strptime("06/07/2025","%d/%m/%Y"),**properties)
-    order_create_2 = OrderCreate(date=datetime.strptime("07/07/2025","%d/%m/%Y"),**properties)
-    crud.create_order(session=db, order_create=order_create_1)
-    crud.create_order(session=db, order_create=order_create_2)
+    order_create_1 = OrderCreate(date="06/07/2025",**properties)
+    order_create_2 = OrderCreate(date="07/07/2025",**properties)
+    crud.create_order(session=db, user_id=user.id, order_create=order_create_1)
+    crud.create_order(session=db, user_id=user.id, order_create=order_create_2)
 
     # Send get request.
     response = client.get("/users/1/orders",params={
@@ -132,16 +130,15 @@ def test_get_orders_by_type(client: TestClient, db: Session, user: User, instrum
     properties = {
         "volume": 1,
         "price": 1,
-        "date": datetime.now(),
-        "user_id": user.id,
+        "date": datetime.now().strftime("%d/%m/%Y"),
         "instrument_id": instrument.id
     }
 
     # Create orders.
     order_create_1 = OrderCreate(type="BUY",**properties)
     order_create_2 = OrderCreate(type="SELL",**properties)
-    crud.create_order(session=db, order_create=order_create_1)
-    crud.create_order(session=db, order_create=order_create_2)
+    crud.create_order(session=db, user_id=user.id, order_create=order_create_1)
+    crud.create_order(session=db, user_id=user.id, order_create=order_create_2)
 
     # Send get request.
     response = client.get("/users/1/orders",params={
@@ -151,3 +148,39 @@ def test_get_orders_by_type(client: TestClient, db: Session, user: User, instrum
     assert response.status_code == 200
     assert len(orders_json["data"]) == 1
     assert orders_json["count"] == 1
+
+# - - - - - - - - - - - - - - - - - - -
+# POST /USERS/{USER_ID}/ORDERS TESTS
+
+def test_create_order(client: TestClient, db: Session, user: User, instrument: Instrument):
+    """
+    Test create order.
+
+    Args:
+        client (TestClient): Test client.
+        db (Session): SQL session.
+        user (User): Test user.
+        instrument (Instrument): Test instrument.
+    """
+    # Properties.
+    properties = {
+        "volume": 1,
+        "price": 1,
+        "date": datetime.now().strftime("%d/%m/%Y"),
+        "type": "BUY",
+        "instrument_id": instrument.id
+    }
+
+    # Send post request.
+    response = client.post(f"/users/{user.id}/orders",json=properties)
+    order_json = response.json()
+    assert response.status_code == 200
+
+    # Check database.
+    order = crud.get_order_by_id(session=db, order_id=order_json["id"])
+    assert order.volume == order_json["volume"]
+    assert order.price == order_json["price"]
+    assert order.date.strftime("%d/%m/%Y") == properties["date"]
+    assert order.type == order_json["type"]
+    assert order.instrument_id == order_json["instrument_id"]
+    assert order.user_id == order_json["user_id"]

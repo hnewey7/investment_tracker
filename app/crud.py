@@ -274,19 +274,21 @@ def delete_instrument(*, session: Session, instrument: Instrument):
 # - - - - - - - - - - - - - - - - - - -
 # ORDER OPERATIONS
 
-def create_order(*, session: Session, order_create: OrderCreate) -> Order:
+def create_order(*, session: Session, user_id: int, order_create: OrderCreate) -> Order:
     """
     Creating a new order.
 
     Args:
         session (Session): SQL session.
+        user_id (int): User id.
         order_create (OrderCreate): Order details.
 
     Returns:
         Order: New order.
     """
     db_obj = Order.model_validate(
-        order_create
+        order_create, 
+        update={"user_id":user_id,"date":datetime.strptime(order_create.date,"%d/%m/%Y")}
     )
     session.add(db_obj)
     session.commit()

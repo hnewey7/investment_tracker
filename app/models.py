@@ -87,8 +87,8 @@ class Order(OrderBase, table=True):
 
 
 class OrderCreate(OrderBase):
-    user_id: int
     instrument_id: int
+    date: str
 
 
 class OrdersPublic(SQLModel):

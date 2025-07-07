@@ -60,19 +60,20 @@ def get_orders(*, session: SessionDep, user_id: int, instrument_id: int=None, st
     "/",
     response_model=Order
 )
-def create_order(*, session: SessionDep, order_in: OrderCreate) -> Order:
+def create_order(*, session: SessionDep, user_id: int, order_in: OrderCreate) -> Order:
     """
     Create order.
 
     Args:
         session (SessionDep): SQL sesssion.
+        user_id (int): User id.
         order_in (OrderCreate): Order details.
 
     Returns:
         Order: New order.
     """
     # Check valid user.
-    user = crud.get_user_by_id(session=session, id=order_in.user_id)
+    user = crud.get_user_by_id(session=session, id=user_id)
     if not user:
         raise HTTPException(
             status_code=400,
@@ -87,5 +88,5 @@ def create_order(*, session: SessionDep, order_in: OrderCreate) -> Order:
             detail="No valid instrument found with instrument id."
         )
 
-    order = crud.create_order(session=session,order_create=order_in)
+    order = crud.create_order(session=session, user_id=user_id, order_create=order_in)
     return order
