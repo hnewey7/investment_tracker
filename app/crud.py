@@ -328,24 +328,24 @@ def get_orders_by_instrument(*, session: Session, user_id: int, instrument_id: i
     return OrdersPublic(data=results,count=len(results))
 
 
-def get_orders_by_date(*, session: Session, user_id: int, start_date: str=None, end_date: str=None) -> OrdersPublic:
+def get_orders_by_date(*, session: Session, user_id: int, start_date: datetime=None, end_date: datetime=None) -> OrdersPublic:
     """
     Get orders within given date range for a given user.
 
     Args:
         session (Session): SQL session.
         user_id (int): User id.
-        start_date (str, optional): Start date. Defaults to None. 
-        end_date (str, optional): End date. Defaults to None.
+        start_date (datetime, optional): Start date. Defaults to None. 
+        end_date (datetime, optional): End date. Defaults to None.
 
     Returns:
         OrdersPublic: Orders
     """
     statement = select(Order).where(Order.user_id == user_id)
     if start_date:
-        statement = statement.where(datetime.strptime(Order.date,"%d/%m/%Y") > datetime.strptime(start_date,"%d/%m/%Y"))
+        statement = statement.where(Order.date >= start_date)
     if end_date:
-        statement = statement.where(datetime.strptime(Order.date,"%d/%m/%Y") < datetime.strptime(end_date,"%d/%m/%Y"))
+        statement = statement.where(Order.date <= end_date)
     results = session.exec(statement).all()
     return OrdersPublic(data=results,count=len(results))
 

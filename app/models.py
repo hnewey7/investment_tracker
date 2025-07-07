@@ -70,7 +70,7 @@ class InstrumentUpdate(SQLModel):
 # - - - - - - - - - - - - - - - - - - -
 
 class OrderBase(SQLModel):
-    date: str # %d/%m/%Y
+    date: datetime
     volume: float
     price: float
     type: str
