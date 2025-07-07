@@ -6,10 +6,11 @@ Created on 24-06-2025
 
 '''
 from datetime import datetime
+import pytest
 
 from sqlmodel import Session, select
 
-from app.models import UserCreate, User, Instrument
+from app.models import UserCreate, User, Instrument, OrderCreate, Order, InstrumentBase
 from app import crud
 from app.tests.utils.utils import random_email, random_lower_string
 from app.core.security import verify_password
@@ -294,9 +295,10 @@ def test_create_instrument(db: Session):
         "symbol":"CCR",
         "currency":"GBX"
     }
+    instrument_create = InstrumentBase(**properties)
 
     # Create instrument.
-    db_obj = crud.create_instrument(session=db,**properties)
+    db_obj = crud.create_instrument(session=db,instrument_create=instrument_create)
 
     # Check properties.
     assert db_obj.name == properties["name"]
@@ -349,9 +351,10 @@ def test_update_instrument_price(db: Session):
         "symbol":"CCR",
         "currency":"GBX"
     }
+    instrument_create = InstrumentBase(**properties)
 
     # Create instrument.
-    instrument = crud.create_instrument(session=db,**properties)
+    instrument = crud.create_instrument(session=db,instrument_create=instrument_create)
 
     # Update instrument prices.
     update_prices = {
@@ -383,9 +386,10 @@ def test_update_instrument_currency(db: Session):
         "symbol":"CCR",
         "currency":"GBX"
     }
+    instrument_create = InstrumentBase(**properties)
 
     # Create instrument.
-    instrument = crud.create_instrument(session=db,**properties)
+    instrument = crud.create_instrument(session=db,instrument_create=instrument_create)
 
     # Update currency.
     db_obj = crud.update_instrument_currency(session=db,instrument=instrument,currency="GBP")

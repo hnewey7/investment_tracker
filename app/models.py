@@ -46,16 +46,16 @@ class UserUpdate(SQLModel):
 class InstrumentBase(SQLModel):
     name: str = Field(max_length=255)
     exchange: str = Field(max_length=255)
-    symbol: str = Field(index=True,max_length=255)
+    symbol: str = Field(unique=True, index=True,max_length=255)
     currency: str = Field(max_length=5)
 
 
 class Instrument(InstrumentBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    open: float | None
-    high: float | None
-    low: float | None
-    close: float | None
+    open: float | None = Field(default=None)
+    high: float | None = Field(default=None)
+    low: float | None = Field(default=None)
+    close: float | None = Field(default=None)
 
 
 class InstrumentsPublic(SQLModel):

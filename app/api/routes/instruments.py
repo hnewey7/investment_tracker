@@ -82,10 +82,7 @@ def create_instrument(*, session: SessionDep, instrument_in: InstrumentBase) -> 
 
     instrument = crud.create_instrument(
         session=session,
-        name=instrument_in.name,
-        exchange=instrument_in.exchange,
-        symbol=instrument_in.symbol,
-        currency=instrument_in.currency
+        instrument_create=instrument_in
     )
     return instrument
 

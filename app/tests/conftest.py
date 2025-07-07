@@ -15,7 +15,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.core.db import engine, create_db_and_tables, clear_db
 from app.core.config import test_settings
-from app.models import User, UserCreate, Instrument
+from app.models import User, UserCreate, Instrument, InstrumentBase
 from app.tests.utils.utils import random_email, random_lower_string
 from app import crud
 
@@ -79,5 +79,25 @@ def instrument() -> Generator[Instrument, None, None]:
             "symbol":"CCR",
             "currency":"GBX"
         }
-        instrument = crud.create_instrument(session=session,**properties)
+        instrument_create = InstrumentBase(**properties)
+        instrument = crud.create_instrument(session=session,instrument_create=instrument_create)
     yield instrument
+
+
+@pytest.fixture(scope="function")
+def multiple_instruments(request) -> Generator[list[Instrument], None, None]:
+    # Instrument list.
+    instruments = []
+    with Session(engine) as session:
+        for i in range(request.param):
+            # Create instruments.
+            properties = {
+                "name": random_lower_string(),
+                "exchange": random_lower_string(),
+                "symbol": random_lower_string(),
+                "currency":"GBX"
+            }
+            instrument_create = InstrumentBase(**properties)
+            instrument = crud.create_instrument(session=session,instrument_create=instrument_create)
+            instruments.append(instrument)
+    yield instruments

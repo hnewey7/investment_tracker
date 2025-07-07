@@ -9,7 +9,7 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from app.models import User, UserCreate, Instrument, Order, OrderCreate, OrdersPublic
+from app.models import User, UserCreate, Instrument, Order, OrderCreate, OrdersPublic, InstrumentBase
 from app.core.security import get_password_hash, verify_password
 
 # - - - - - - - - - - - - - - - - - - -
@@ -166,20 +166,16 @@ def delete_user(*, session: Session, user: User):
 # - - - - - - - - - - - - - - - - - - -
 # INSTRUMENT OPERATIONS
 
-def create_instrument(*, session: Session, name:str, exchange: str, symbol: str, currency: str):
+def create_instrument(*, session: Session, instrument_create: InstrumentBase):
     """
     Creating instrument.
 
     Args:
         session (Session): 
-        exchange (str): Exchange instrument is available on.
-        symbol (str): Symbol.
+        instrument_create (InstrumentBase): Instrument details.
     """
-    db_obj = Instrument(
-        name=name,
-        exchange=exchange,
-        symbol=symbol,
-        currency=currency
+    db_obj = Instrument.model_validate(
+        instrument_create
     )
     session.add(db_obj)
     session.commit()
