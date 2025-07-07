@@ -95,4 +95,13 @@ class OrdersPublic(SQLModel):
     data: list[Order]
     count: int
 
+
+class OrderUpdate(SQLModel):
+    date: Optional[datetime] = None
+    volume: Optional[float] = None
+    price: Optional[float] = None
+    type: Optional[str] = None
+    user_id: Optional[int] = None
+    instrument_id: Optional[int] = None
+
 # # - - - - - - - - - - - - - - - - - - -

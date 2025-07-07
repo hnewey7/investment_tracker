@@ -9,7 +9,7 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from app.models import User, UserCreate, Instrument, Order, OrderCreate, OrdersPublic, InstrumentBase
+from app.models import User, UserCreate, Instrument, Order, OrderCreate, OrdersPublic, InstrumentBase, OrderUpdate
 from app.core.security import get_password_hash, verify_password
 
 # - - - - - - - - - - - - - - - - - - -
@@ -382,3 +382,24 @@ def get_order_by_id(*, session: Session, order_id: int) -> Order:
     statement = select(Order).where(Order.id == order_id)
     db_obj = session.exec(statement).first()
     return db_obj
+
+
+def update_order(*, session: Session, order: Order, order_update: OrderUpdate) -> Order:
+    """
+    Update order.
+
+    Args:
+        session (Session): SQL session.
+        order (Order): Order to update.
+        order_update (OrderUpdate): New details.
+
+    Returns:
+        Order: Updated order.
+    """
+    update_dict = order_update.model_dump(exclude_unset=True)
+    for key, value in update_dict.items():
+        if hasattr(order, key):
+            setattr(order, key, value)
+    session.commit()
+    session.refresh(order)
+    return order

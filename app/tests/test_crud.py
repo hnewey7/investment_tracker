@@ -10,7 +10,7 @@ import pytest
 
 from sqlmodel import Session, select
 
-from app.models import UserCreate, User, Instrument, OrderCreate, Order, InstrumentBase
+from app.models import UserCreate, User, Instrument, OrderCreate, OrderUpdate, InstrumentBase
 from app import crud
 from app.tests.utils.utils import random_email, random_lower_string
 from app.core.security import verify_password
@@ -589,3 +589,107 @@ def test_get_order_by_id(db: Session, user: User, instrument: Instrument):
     # Get order by id.
     db_obj = crud.get_order_by_id(session=db, order_id=test_order_1.id)
     assert test_order_1 == db_obj
+
+
+def test_update_order(db: Session, user: User, instrument: Instrument):
+    """
+    Test update order.
+
+    Args:
+        db (Session): SQL session.
+        user (User): Test user.
+        instrument (Instrument): Test instrument.
+    """
+    # Properties.
+    properties = {
+        "volume": 1,
+        "price": 1,
+        "type": "BUY",
+        "user_id": user.id,
+        "instrument_id": instrument.id
+    }
+
+    # Create order.
+    order_create = OrderCreate(date=datetime.now(),**properties)
+    test_order = crud.create_order(session=db, order_create=order_create)
+
+    # Update order date.
+    new_datetime = datetime.now()
+    order_update = OrderUpdate(date=new_datetime)
+    updated_order = crud.update_order(session=db, order=test_order, order_update=order_update)
+    assert updated_order.date == new_datetime
+    assert updated_order.volume == test_order.volume
+    assert updated_order.price == test_order.price
+    assert updated_order.type == test_order.type
+    assert updated_order.user_id == test_order.user_id
+    assert updated_order.instrument_id == test_order.instrument_id
+
+    # Update order date and volume.
+    new_datetime = datetime.now()
+    new_volume = 2
+    order_update = OrderUpdate(date=new_datetime, volume=new_volume)
+    updated_order = crud.update_order(session=db, order=test_order, order_update=order_update)
+    assert updated_order.date == new_datetime
+    assert updated_order.volume == new_volume
+    assert updated_order.price == test_order.price
+    assert updated_order.type == test_order.type
+    assert updated_order.user_id == test_order.user_id
+    assert updated_order.instrument_id == test_order.instrument_id
+
+
+@pytest.mark.parametrize("multiple_users", [2], indirect=True)
+def test_update_order_user(db: Session, multiple_users: list[User], instrument: Instrument):
+    """
+    Test update order's user.
+
+    Args:
+        db (Session): SQL session.
+        multiple_users (list[User]): Multiple users fixture.
+        instrument (Instrument): Test instrument.
+    """
+    # Properties.
+    properties = {
+        "volume": 1,
+        "price": 1,
+        "type": "BUY",
+        "user_id": 1,
+        "instrument_id": instrument.id
+    }
+
+    # Create order.
+    order_create = OrderCreate(date=datetime.now(),**properties)
+    test_order = crud.create_order(session=db, order_create=order_create)
+
+    # Update user id.
+    order_update = OrderUpdate(user_id=2)
+    updated_order = crud.update_order(session=db, order=test_order, order_update=order_update)
+    assert updated_order.user == multiple_users[1]
+
+
+@pytest.mark.parametrize("multiple_instruments", [2], indirect=True)
+def test_update_order_instrument(db: Session, user: User, multiple_instruments: list[Instrument]):
+    """
+    Test update order's instrument.
+
+    Args:
+        db (Session): SQL session.
+        user (User): Test user.
+        multiple_instruments (list[Instrument]): Multiple instruments fixture.
+    """
+    # Properties.
+    properties = {
+        "volume": 1,
+        "price": 1,
+        "type": "BUY",
+        "user_id": user.id,
+        "instrument_id": 1
+    }
+
+    # Create order.
+    order_create = OrderCreate(date=datetime.now(),**properties)
+    test_order = crud.create_order(session=db, order_create=order_create)
+
+    # Update user id.
+    order_update = OrderUpdate(instrument_id=2)
+    updated_order = crud.update_order(session=db, order=test_order, order_update=order_update)
+    assert updated_order.instrument == multiple_instruments[1]
