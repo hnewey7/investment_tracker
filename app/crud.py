@@ -294,76 +294,41 @@ def create_order(*, session: Session, order_create: OrderCreate) -> Order:
     return db_obj
 
 
-def get_orders_by_user(*, session: Session, user_id: int) -> OrdersPublic:
+def get_orders(
+        *, 
+        session: Session,
+        user_id: int, 
+        instrument_id: int=None, 
+        start_date: datetime=None, 
+        end_date: datetime=None, 
+        type: str=None
+    ) -> OrdersPublic:
     """
-    Get all orders for a given user.
+    Get orders with various filters.
 
     Args:
         session (Session): SQL session.
         user_id (int): User id.
-
-    Returns:
-        OrdersPublic: Returned orders.
-    """
-    statement = select(Order).where(Order.user_id == user_id)
-    results = session.exec(statement).all()
-    return OrdersPublic(data=results, count=len(results))
-
-
-def get_orders_by_instrument(*, session: Session, user_id: int, instrument_id: int) -> OrdersPublic:
-    """
-    Get orders by instrument for a given user.
-
-    Args:
-        session (Session): SQL session.
-        user_id (int): User id.
-        instrument_id (int): Instrument id.
-
-    Returns:
-        OrdersPublic: Orders
-    """
-    # Get orders.
-    statement = select(Order).where(Order.user_id == user_id).where(Order.instrument_id == instrument_id)
-    results = session.exec(statement).all()
-    return OrdersPublic(data=results,count=len(results))
-
-
-def get_orders_by_date(*, session: Session, user_id: int, start_date: datetime=None, end_date: datetime=None) -> OrdersPublic:
-    """
-    Get orders within given date range for a given user.
-
-    Args:
-        session (Session): SQL session.
-        user_id (int): User id.
-        start_date (datetime, optional): Start date. Defaults to None. 
+        instrument_id (int, optional): Instrument id. Defaults to None.
+        start_date (datetime, optional): Start date.. Defaults to None.
         end_date (datetime, optional): End date. Defaults to None.
+        type (str, optional): Type. Defaults to None.
 
     Returns:
-        OrdersPublic: Orders
+        OrdersPublic: Returned orders
     """
+    # Basic statement.
     statement = select(Order).where(Order.user_id == user_id)
+
+    if instrument_id:
+        statement = statement.where(Order.instrument_id == instrument_id)
     if start_date:
         statement = statement.where(Order.date >= start_date)
     if end_date:
         statement = statement.where(Order.date <= end_date)
-    results = session.exec(statement).all()
-    return OrdersPublic(data=results,count=len(results))
+    if type:
+        statement = statement.where(Order.type == type)
 
-
-def get_orders_by_type(*, session: Session, user_id: int, type: str) -> OrdersPublic:
-    """
-    Get orders by type for a given user.
-
-    Args:
-        session (Session): SQL session.
-        user_id (int): User id.
-        type (str): Type of order.
-
-    Returns:
-        OrdersPublic: Orders.
-    """
-    # Get orders.
-    statement = select(Order).where(Order.user_id == user_id).where(Order.type == type)
     results = session.exec(statement).all()
     return OrdersPublic(data=results,count=len(results))
 

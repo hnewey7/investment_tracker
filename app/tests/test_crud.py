@@ -486,7 +486,7 @@ def test_get_orders_by_user(db: Session, multiple_users: list[User], instrument:
     test_order_1 = crud.create_order(session=db, order_create=order_create)
 
     # Get orders.
-    db_obj = crud.get_orders_by_user(session=db, user_id=1)
+    db_obj = crud.get_orders(session=db, user_id=1)
     assert len(db_obj.data) == 1
     assert db_obj.count == 1
     assert db_obj.data[0] == test_order_1
@@ -516,7 +516,7 @@ def test_get_orders_by_instrument(db: Session, user: User, multiple_instruments:
     test_order_1 = crud.create_order(session=db, order_create=order_create)
 
     # Get orders.
-    db_obj = crud.get_orders_by_instrument(session=db, user_id=user.id, instrument_id=1)
+    db_obj = crud.get_orders(session=db, user_id=user.id, instrument_id=1)
     assert len(db_obj.data) == 1
     assert db_obj.count == 1
     assert db_obj.data[0] == test_order_1
@@ -526,7 +526,7 @@ def test_get_orders_by_instrument(db: Session, user: User, multiple_instruments:
     test_order_2 = crud.create_order(session=db, order_create=order_create)
 
     # Get orders.
-    db_obj = crud.get_orders_by_instrument(session=db, user_id=user.id, instrument_id=1)
+    db_obj = crud.get_orders(session=db, user_id=user.id, instrument_id=1)
     assert len(db_obj.data) == 2
     assert db_obj.count == 2
     assert db_obj.data[0] == test_order_1
@@ -558,7 +558,7 @@ def test_get_orders_by_date(db: Session, user: User, instrument: Instrument):
     test_order_2 = crud.create_order(session=db, order_create=order_create_2)
 
     # Get orders by date.
-    orders = crud.get_orders_by_date(session=db, user_id=user.id, start_date="07/07/2025")
+    orders = crud.get_orders(session=db, user_id=user.id, start_date="07/07/2025")
     assert orders.count == 1
     assert orders.data[0] == test_order_2
 
