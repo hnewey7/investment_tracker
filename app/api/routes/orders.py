@@ -8,7 +8,7 @@ Created on 06-07-2025
 from datetime import datetime
 from fastapi import APIRouter, HTTPException
 
-from app.models import Order, OrderCreate, OrdersPublic
+from app.models import Order, OrderCreate, OrdersPublic, OrderUpdate
 from app.api.deps import SessionDep
 from app import crud
 
@@ -144,4 +144,30 @@ def get_order(*, session: SessionDep, order_id: int) -> Order:
             status_code=400,
             detail="No order found with order id."
         )
+    return order
+
+
+@router.put(
+    "/{order_id}",
+    response_model=Order
+)
+def update_order(*, session: SessionDep, order_id: int, order_update: OrderUpdate) -> Order:
+    """
+    Update order.
+
+    Args:
+        session (SessionDep): SQL session.
+        order_id (int): Order id.
+        order_update (OrderUpdate): Order update.
+
+    Returns:
+        Order: Updated order.
+    """
+    order = crud.get_order_by_id(session=session, order_id=order_id)
+    if not order:
+        raise HTTPException(
+            status_code=400,
+            detail="No order found with order id."
+        )
+    order = crud.update_order(session=session, order=order, order_update=order_update)
     return order

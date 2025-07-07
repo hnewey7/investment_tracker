@@ -11,7 +11,7 @@ from datetime import datetime
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from app.models import User, Instrument, OrderCreate
+from app.models import User, Instrument, OrderCreate, OrderUpdate
 from app import crud
 
 # - - - - - - - - - - - - - - - - - - -
@@ -262,3 +262,50 @@ def test_get_order(client: TestClient, db: Session, user: User, instrument: Inst
     assert order_json["volume"] == order.volume
     assert order_json["price"] == order.price
     assert order_json["type"] == order.type
+
+# - - - - - - - - - - - - - - - - - - -
+# PUT /USERS/{USER_ID}/ORDERS/{ORDER_ID} TESTS
+
+@pytest.mark.parametrize("multiple_instruments", [2], indirect=True)
+def test_update_order(client: TestClient, db: Session, user: User, multiple_instruments: list[Instrument]):
+    """
+    Test update order.
+
+    Args:
+        client (TestClient): Test client.
+        db (Session): SQL session.
+        user (User): Test user.
+        multiple_instruments (list[Instrument]): Test multiple instrument.
+    """
+    # Properties.
+    properties = {
+        "date": datetime.now(),
+        "volume": 1,
+        "price": 1,
+        "type": "BUY",
+        "instrument_id": 1,
+    }
+
+    # Create orders.
+    order_create = OrderCreate(**properties)
+    order = crud.create_order(session=db, user_id=user.id, order_create=order_create)
+
+    # Order update.
+    datetime_property = datetime.now()
+    update_properties = {
+        "date":str(datetime_property),
+        "volume":2,
+        "price":2,
+        "type":"SELL",
+        "instrument_id":2
+    }
+
+    # Send put request.
+    response = client.put(f"/users/{user.id}/orders/{order.id}",json=update_properties)
+    order_json = response.json()
+    assert response.status_code == 200
+    assert order_json["date"] == datetime_property.strftime("%Y-%m-%dT%H:%M:%S.%f")
+    assert order_json["volume"] == update_properties["volume"]
+    assert order_json["price"] == update_properties["price"]
+    assert order_json["type"] == update_properties["type"]
+    assert order_json["instrument_id"] == update_properties["instrument_id"]
