@@ -171,3 +171,28 @@ def update_order(*, session: SessionDep, order_id: int, order_update: OrderUpdat
         )
     order = crud.update_order(session=session, order=order, order_update=order_update)
     return order
+
+
+@router.delete(
+    "/{order_id}",
+    response_model=Order
+)
+def delete_order(*, session: SessionDep, order_id: int) -> Order:
+    """
+    Delete order.
+
+    Args:
+        session (SessionDep): SQL session.
+        order_id (int): Order id.
+
+    Returns:
+        Order: Deleted order.
+    """
+    order = crud.get_order_by_id(session=session, order_id=order_id)
+    if not order:
+        raise HTTPException(
+            status_code=400,
+            detail="No order found with order id."
+        )
+    crud.delete_order(session=session, order=order)
+    return order

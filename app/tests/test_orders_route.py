@@ -309,3 +309,35 @@ def test_update_order(client: TestClient, db: Session, user: User, multiple_inst
     assert order_json["price"] == update_properties["price"]
     assert order_json["type"] == update_properties["type"]
     assert order_json["instrument_id"] == update_properties["instrument_id"]
+
+# - - - - - - - - - - - - - - - - - - -
+# DELETE /USERS/{USER_ID}/ORDERS/{ORDER_ID} TESTS
+
+def test_delete_order(client: TestClient, db: Session, user: User, instrument: Instrument):
+    """
+    Delete order.
+
+    Args:
+        client (TestClient): Test client.
+        db (Session): SQL session.
+        user (User): Test user.
+        instrument (Instrument): Test instrument.
+    """
+    # Properties.
+    properties = {
+        "date": datetime.now(),
+        "volume": 1,
+        "price": 1,
+        "type": "BUY",
+        "instrument_id": 1,
+    }
+
+    # Create orders.
+    order_create = OrderCreate(**properties)
+    order = crud.create_order(session=db, user_id=user.id, order_create=order_create)
+
+    # Send delete request.
+    response = client.delete(f"/users/{user.id}/orders/{order.id}")
+    order_json = response.json()
+    assert response.status_code == 200
+    assert not crud.get_order_by_id(session=db, order_id=order.id)
