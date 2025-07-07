@@ -288,7 +288,7 @@ def create_order(*, session: Session, user_id: int, order_create: OrderCreate) -
     """
     db_obj = Order.model_validate(
         order_create, 
-        update={"user_id":user_id,"date":datetime.strptime(order_create.date,"%d/%m/%Y")}
+        update={"user_id":user_id}
     )
     session.add(db_obj)
     session.commit()

@@ -88,12 +88,6 @@ class Order(OrderBase, table=True):
 
 class OrderCreate(OrderBase):
     instrument_id: int
-    date: str
-
-
-class OrdersPublic(SQLModel):
-    data: list[Order]
-    count: int
 
 
 class OrderUpdate(SQLModel):
@@ -103,5 +97,11 @@ class OrderUpdate(SQLModel):
     type: Optional[str] = None
     user_id: Optional[int] = None
     instrument_id: Optional[int] = None
+
+
+class OrdersPublic(SQLModel):
+    data: list[Order]
+    count: int
+
 
 # # - - - - - - - - - - - - - - - - - - -

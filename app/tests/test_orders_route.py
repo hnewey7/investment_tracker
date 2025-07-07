@@ -29,7 +29,7 @@ def test_get_orders(client: TestClient, db: Session, multiple_users: list[User],
     """
     # Properties.
     properties = {
-        "date": datetime.now().strftime("%d/%m/%Y"),
+        "date": datetime.now(),
         "volume": 1,
         "price": 1,
         "type": "BUY",
@@ -62,7 +62,7 @@ def test_get_orders_by_instrument(client: TestClient, db: Session, user: User, m
     """
     # Properties.
     properties = {
-        "date": datetime.now().strftime("%d/%m/%Y"),
+        "date": datetime.now(),
         "volume": 1,
         "price": 1,
         "type": "BUY"
@@ -102,8 +102,8 @@ def test_get_orders_by_date(client: TestClient, db: Session, user: User, instrum
     }
 
     # Create orders.
-    order_create_1 = OrderCreate(date="06/07/2025",**properties)
-    order_create_2 = OrderCreate(date="07/07/2025",**properties)
+    order_create_1 = OrderCreate(date=datetime.strptime("06/07/2025","%d/%m/%Y"),**properties)
+    order_create_2 = OrderCreate(date=datetime.strptime("07/07/2025","%d/%m/%Y"),**properties)
     crud.create_order(session=db, user_id=user.id, order_create=order_create_1)
     crud.create_order(session=db, user_id=user.id, order_create=order_create_2)
 
@@ -130,7 +130,7 @@ def test_get_orders_by_type(client: TestClient, db: Session, user: User, instrum
     properties = {
         "volume": 1,
         "price": 1,
-        "date": datetime.now().strftime("%d/%m/%Y"),
+        "date": datetime.now(),
         "instrument_id": instrument.id
     }
 
@@ -163,10 +163,11 @@ def test_create_order(client: TestClient, db: Session, user: User, instrument: I
         instrument (Instrument): Test instrument.
     """
     # Properties.
+    datetime_property = datetime.now()
     properties = {
         "volume": 1,
         "price": 1,
-        "date": datetime.now().strftime("%d/%m/%Y"),
+        "date": str(datetime_property),
         "type": "BUY",
         "instrument_id": instrument.id
     }
@@ -180,7 +181,7 @@ def test_create_order(client: TestClient, db: Session, user: User, instrument: I
     order = crud.get_order_by_id(session=db, order_id=order_json["id"])
     assert order.volume == order_json["volume"]
     assert order.price == order_json["price"]
-    assert order.date.strftime("%d/%m/%Y") == properties["date"]
+    assert order.date == datetime_property
     assert order.type == order_json["type"]
     assert order.instrument_id == order_json["instrument_id"]
     assert order.user_id == order_json["user_id"]
@@ -200,7 +201,7 @@ def test_delete_orders(client: TestClient, db: Session, user: User, instrument: 
     """
     # Properties.
     properties = {
-        "date": datetime.now().strftime("%d/%m/%Y"),
+        "date": datetime.now(),
         "volume": 1,
         "price": 1,
         "type": "BUY",
@@ -223,3 +224,41 @@ def test_delete_orders(client: TestClient, db: Session, user: User, instrument: 
     orders = crud.get_orders(session=db, user_id=user.id)
     assert len(orders.data) == 0
     assert orders.count == 0
+
+# - - - - - - - - - - - - - - - - - - -
+# GET /USERS/{USER_ID}/ORDERS/{ORDER_ID} TESTS
+
+def test_get_order(client: TestClient, db: Session, user: User, instrument: Instrument):
+    """
+    Test get order endpoint.
+
+    Args:
+        client (TestClient): Test client.
+        db (Session): SQL session.
+        user (User): Test user.
+        instrument (Instrument): Test instrument.
+    """
+    # Properties.
+    properties = {
+        "date": datetime.now(),
+        "volume": 1,
+        "price": 1,
+        "type": "BUY",
+        "instrument_id": instrument.id,
+    }
+
+    # Create orders.
+    order_create = OrderCreate(**properties)
+    order = crud.create_order(session=db, user_id=user.id, order_create=order_create)
+
+    # Send get request.
+    response = client.get(f"/users/{user.id}/orders/{order.id}")
+    order_json = response.json()
+    assert response.status_code == 200
+    assert order_json["id"] == order.id
+    assert order_json["user_id"] == order.user_id
+    assert order_json["instrument_id"] == order.instrument_id
+    assert order_json["date"] == order.date.strftime("%Y-%m-%dT%H:%M:%S.%f")
+    assert order_json["volume"] == order.volume
+    assert order_json["price"] == order.price
+    assert order_json["type"] == order.type

@@ -437,7 +437,7 @@ def test_create_order(db: Session, user: User, instrument: Instrument):
     """
     # Properties.
     properties = {
-        "date": datetime.now().strftime("%d/%m/%Y"),
+        "date": datetime.now(),
         "volume": 1,
         "price": 1,
         "type": "BUY",
@@ -449,7 +449,7 @@ def test_create_order(db: Session, user: User, instrument: Instrument):
     db_obj = crud.create_order(session=db, user_id=user.id, order_create=order_create)
 
     # Check properties.
-    assert db_obj.date.strftime("%d/%m/%Y") == properties["date"]
+    assert db_obj.date == properties["date"]
     assert db_obj.volume == properties["volume"]
     assert db_obj.price == properties["price"]
     assert db_obj.type == properties["type"]
@@ -480,7 +480,7 @@ def test_get_orders_by_user(db: Session, multiple_users: list[User], instrument:
     }
 
     # Create order.
-    order_create = OrderCreate(date=datetime.now().strftime("%d/%m/%Y"),**properties)
+    order_create = OrderCreate(date=datetime.now(),**properties)
     test_order_1 = crud.create_order(session=db, user_id=1, order_create=order_create)
 
     # Get orders.
@@ -509,7 +509,7 @@ def test_get_orders_by_instrument(db: Session, user: User, multiple_instruments:
     }
 
     # Create order.
-    order_create = OrderCreate(date=datetime.now().strftime("%d/%m/%Y"),**properties)
+    order_create = OrderCreate(date=datetime.now(),**properties)
     test_order_1 = crud.create_order(session=db, user_id=user.id, order_create=order_create)
 
     # Get orders.
@@ -519,7 +519,7 @@ def test_get_orders_by_instrument(db: Session, user: User, multiple_instruments:
     assert db_obj.data[0] == test_order_1
 
     # Create another order.
-    order_create = OrderCreate(date=datetime.now().strftime("%d/%m/%Y"),**properties)
+    order_create = OrderCreate(date=datetime.now(),**properties)
     test_order_2 = crud.create_order(session=db, user_id=user.id, order_create=order_create)
 
     # Get orders.
@@ -548,8 +548,8 @@ def test_get_orders_by_date(db: Session, user: User, instrument: Instrument):
     }
 
     # Create two orders.
-    order_create_1 = OrderCreate(date="06/07/2025",**properties)
-    order_create_2 = OrderCreate(date="07/07/2025",**properties)
+    order_create_1 = OrderCreate(date=datetime.strptime("06/07/2025","%d/%m/%Y"),**properties)
+    order_create_2 = OrderCreate(date=datetime.strptime("07/07/2025","%d/%m/%Y"),**properties)
     test_order_1 = crud.create_order(session=db, user_id=user.id, order_create=order_create_1)
     test_order_2 = crud.create_order(session=db, user_id=user.id, order_create=order_create_2)
 
@@ -577,7 +577,7 @@ def test_get_order_by_id(db: Session, user: User, instrument: Instrument):
     }
 
     # Create two orders.
-    order_create = OrderCreate(date=datetime.now().strftime("%d/%m/%Y"),**properties)
+    order_create = OrderCreate(date=datetime.now(),**properties)
     test_order_1 = crud.create_order(session=db, user_id=user.id, order_create=order_create)
     test_order_2 = crud.create_order(session=db, user_id=user.id, order_create=order_create)
 
@@ -604,7 +604,7 @@ def test_update_order(db: Session, user: User, instrument: Instrument):
     }
 
     # Create order.
-    order_create = OrderCreate(date=datetime.now().strftime("%d/%m/%Y"),**properties)
+    order_create = OrderCreate(date=datetime.now(),**properties)
     test_order = crud.create_order(session=db, user_id=user.id, order_create=order_create)
 
     # Update order date.
@@ -650,7 +650,7 @@ def test_update_order_user(db: Session, multiple_users: list[User], instrument: 
     }
 
     # Create order.
-    order_create = OrderCreate(date=datetime.now().strftime("%d/%m/%Y"),**properties)
+    order_create = OrderCreate(date=datetime.now(),**properties)
     test_order = crud.create_order(session=db, user_id=1, order_create=order_create)
 
     # Update user id.
@@ -678,7 +678,7 @@ def test_update_order_instrument(db: Session, user: User, multiple_instruments: 
     }
 
     # Create order.
-    order_create = OrderCreate(date=datetime.now().strftime("%d/%m/%Y"),**properties)
+    order_create = OrderCreate(date=datetime.now(),**properties)
     test_order = crud.create_order(session=db, user_id=user.id, order_create=order_create)
 
     # Update user id.
@@ -705,7 +705,7 @@ def test_delete_order(db: Session, user: User, instrument: Instrument):
     }
 
     # Create order.
-    order_create = OrderCreate(date=datetime.now().strftime("%d/%m/%Y"),**properties)
+    order_create = OrderCreate(date=datetime.now(),**properties)
     test_order = crud.create_order(session=db, user_id=user.id, order_create=order_create)
     assert crud.get_order_by_id(session=db, order_id=test_order.id)
 
