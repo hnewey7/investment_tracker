@@ -70,7 +70,7 @@ class InstrumentUpdate(SQLModel):
 # - - - - - - - - - - - - - - - - - - -
 
 class OrderBase(SQLModel):
-    date: str
+    date: str # %d/%m/%Y
     volume: float
     price: float
     type: str
@@ -84,5 +84,15 @@ class Order(OrderBase, table=True):
 
     user_id: int = Field(index=True,foreign_key="user.id")
     user: User = Relationship(back_populates="orders")
+
+
+class OrderCreate(OrderBase):
+    user_id: int
+    instrument_id: int
+
+
+class OrdersPublic(SQLModel):
+    data: list[Order]
+    count: int
 
 # # - - - - - - - - - - - - - - - - - - -

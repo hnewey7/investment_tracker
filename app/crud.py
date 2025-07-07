@@ -9,7 +9,7 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from app.models import User, UserCreate, Instrument
+from app.models import User, UserCreate, Instrument, Order, OrderCreate, OrdersPublic
 from app.core.security import get_password_hash, verify_password
 
 # - - - - - - - - - - - - - - - - - - -
@@ -274,3 +274,115 @@ def delete_instrument(*, session: Session, instrument: Instrument):
     # Delete instrument.
     session.delete(instrument)
     session.commit()
+
+# - - - - - - - - - - - - - - - - - - -
+# ORDER OPERATIONS
+
+def create_order(*, session: Session, order_create: OrderCreate) -> Order:
+    """
+    Creating a new order.
+
+    Args:
+        session (Session): SQL session.
+        order_create (OrderCreate): Order details.
+
+    Returns:
+        Order: New order.
+    """
+    db_obj = Order.model_validate(
+        order_create
+    )
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_orders_by_user(*, session: Session, user_id: int) -> OrdersPublic:
+    """
+    Get all orders for a given user.
+
+    Args:
+        session (Session): SQL session.
+        user_id (int): User id.
+
+    Returns:
+        OrdersPublic: Returned orders.
+    """
+    statement = select(Order).where(Order.user_id == user_id)
+    results = session.exec(statement).all()
+    return OrdersPublic(data=results, count=len(results))
+
+
+def get_orders_by_instrument(*, session: Session, user_id: int, instrument_id: int) -> OrdersPublic:
+    """
+    Get orders by instrument for a given user.
+
+    Args:
+        session (Session): SQL session.
+        user_id (int): User id.
+        instrument_id (int): Instrument id.
+
+    Returns:
+        OrdersPublic: Orders
+    """
+    # Get orders.
+    statement = select(Order).where(Order.user_id == user_id).where(Order.instrument_id == instrument_id)
+    results = session.exec(statement).all()
+    return OrdersPublic(data=results,count=len(results))
+
+
+def get_orders_by_date(*, session: Session, user_id: int, start_date: str=None, end_date: str=None) -> OrdersPublic:
+    """
+    Get orders within given date range for a given user.
+
+    Args:
+        session (Session): SQL session.
+        user_id (int): User id.
+        start_date (str, optional): Start date. Defaults to None. 
+        end_date (str, optional): End date. Defaults to None.
+
+    Returns:
+        OrdersPublic: Orders
+    """
+    statement = select(Order).where(Order.user_id == user_id)
+    if start_date:
+        statement = statement.where(datetime.strptime(Order.date,"%d/%m/%Y") > datetime.strptime(start_date,"%d/%m/%Y"))
+    if end_date:
+        statement = statement.where(datetime.strptime(Order.date,"%d/%m/%Y") < datetime.strptime(end_date,"%d/%m/%Y"))
+    results = session.exec(statement).all()
+    return OrdersPublic(data=results,count=len(results))
+
+
+def get_orders_by_type(*, session: Session, user_id: int, type: str) -> OrdersPublic:
+    """
+    Get orders by type for a given user.
+
+    Args:
+        session (Session): SQL session.
+        user_id (int): User id.
+        type (str): Type of order.
+
+    Returns:
+        OrdersPublic: Orders.
+    """
+    # Get orders.
+    statement = select(Order).where(Order.user_id == user_id).where(Order.type == type)
+    results = session.exec(statement).all()
+    return OrdersPublic(data=results,count=len(results))
+
+
+def get_order_by_id(*, session: Session, order_id: int) -> Order:
+    """
+    Get order by id.
+
+    Args:
+        session (Session): SQL session.
+        order_id (int): Order id.
+
+    Returns:
+        Order: Order.
+    """
+    statement = select(Order).where(Order.id == order_id)
+    db_obj = session.exec(statement).first()
+    return db_obj
