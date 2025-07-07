@@ -90,3 +90,34 @@ def create_order(*, session: SessionDep, user_id: int, order_in: OrderCreate) ->
 
     order = crud.create_order(session=session, user_id=user_id, order_create=order_in)
     return order
+
+
+@router.delete(
+    "/",
+    response_model=OrdersPublic
+)
+def delete_orders(*, session: SessionDep, user_id: int) -> OrdersPublic:
+    """
+    Delete orders.
+
+    Args:
+        session (SessionDep): SQL session.
+        user_id (int): User id.
+
+    Returns:
+        OrdersPublic: Deleted orders.
+    """
+    # Check valid user.
+    user = crud.get_user_by_id(session=session, id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="No valid user found with user id."
+        )
+    
+    # Delete orders.
+    orders = crud.get_orders(session=session, user_id=user_id)
+    for order in orders.data:
+        crud.delete_order(session=session, order=order)
+
+    return orders

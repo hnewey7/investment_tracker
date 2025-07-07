@@ -184,3 +184,42 @@ def test_create_order(client: TestClient, db: Session, user: User, instrument: I
     assert order.type == order_json["type"]
     assert order.instrument_id == order_json["instrument_id"]
     assert order.user_id == order_json["user_id"]
+
+# - - - - - - - - - - - - - - - - - - -
+# DELETE /USERS/{USER_ID}/ORDERS TESTS
+
+def test_delete_orders(client: TestClient, db: Session, user: User, instrument: Instrument):
+    """
+    Test delete orders.
+
+    Args:
+        client (TestClient): Test client.
+        db (Session): SQL session.
+        user (User): Test user.
+        instrument (Instrument): Test instrument.
+    """
+    # Properties.
+    properties = {
+        "date": datetime.now().strftime("%d/%m/%Y"),
+        "volume": 1,
+        "price": 1,
+        "type": "BUY",
+        "instrument_id": instrument.id,
+    }
+
+    # Create orders.
+    order_create = OrderCreate(**properties)
+    crud.create_order(session=db, user_id=1, order_create=order_create)
+    crud.create_order(session=db, user_id=1, order_create=order_create)
+
+    # Delete request.
+    response = client.delete(f"/users/{user.id}/orders")
+    orders_json = response.json()
+    assert response.status_code == 200
+    assert len(orders_json["data"]) == 2
+    assert orders_json["count"] == 2
+    
+    # Check database.
+    orders = crud.get_orders(session=db, user_id=user.id)
+    assert len(orders.data) == 0
+    assert orders.count == 0
