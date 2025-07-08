@@ -9,7 +9,7 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from app.models import User, UserCreate, Instrument, Order, OrderCreate, OrdersPublic, InstrumentBase, OrderUpdate
+from app.models import User, UserCreate, Instrument, Order, OrderCreate, OrdersPublic, InstrumentBase, OrderUpdate, Summary, SummaryUpdate
 from app.core.security import get_password_hash, verify_password
 
 # - - - - - - - - - - - - - - - - - - -
@@ -382,4 +382,89 @@ def delete_order(*, session: Session, order: Order) -> None:
     """
     session.delete(order)
     session.commit()
-    
+
+# - - - - - - - - - - - - - - - - - - -
+# SUMMARY OPERATIONS
+
+def create_summary(*, session: Session, user: User) -> Summary:
+    """
+    Create summary.
+
+    Args:
+        session (Session): SQL session.
+        user (User): User.
+
+    Returns:
+        Summary: New summary.
+    """
+    db_obj = Summary(user=user)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def get_summary_by_id(*, session: Session, summary_id: int) -> Summary:
+    """
+    Get summary by id.
+
+    Args:
+        session (Session): SQL session.
+        summary_id (int): Summary id.
+
+    Returns:
+        Summary: Summary.
+    """
+    statement = select(Summary).where(Summary.id == summary_id)
+    db_obj = session.exec(statement).first()
+    return db_obj
+
+
+def get_summary_by_user_id(*, session: Session, user_id: int) -> Summary:
+    """
+    Get summary by user id.
+
+    Args:
+        session (Session): SQL session.
+        user_id (int): User id.
+
+    Returns:
+        Summary: Summary.
+    """
+    column = getattr(Summary,"user_id")
+    statement = select(Summary).where(column == user_id)
+    db_obj = session.exec(statement).first()
+    return db_obj
+
+
+def update_summary(*, session: Session, summary: Summary, summary_update: SummaryUpdate) -> Summary:
+    """
+    Update summary.
+
+    Args:
+        session (Session): SQL session.
+        summary (Summary): Summary to update.
+        summary_update (SummaryUpdate): Update summary details.
+
+    Returns:
+        Summary: Updated summary.
+    """
+    update_dict = summary_update.model_dump(exclude_unset=True)
+    for key, value in update_dict.items():
+        if hasattr(summary, key):
+            setattr(summary, key, value)
+    session.commit()
+    session.refresh(summary)
+    return summary
+
+
+def delete_summary(*, session: Session, summary: Summary) -> None:
+    """
+    Delete summary.
+
+    Args:
+        session (Session): SQL session.
+        summary (Summary): Summary to delete.
+    """
+    session.delete(summary)
+    session.commit()

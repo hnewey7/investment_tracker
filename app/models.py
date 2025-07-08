@@ -21,6 +21,7 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     orders: list["Order"] = Relationship(back_populates="user")
+    summary: "Summary" = Relationship(back_populates="user")
     hashed_password: str
 
 
@@ -104,4 +105,20 @@ class OrdersPublic(SQLModel):
     count: int
 
 
-# # - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - -
+
+class SummaryBase(SQLModel):
+    ending_market_value: Optional[float] = None
+    beginning_market_value: Optional[float] = None
+    profit_loss: Optional[float] = None
+
+
+class Summary(SummaryBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+
+    user_id: int = Field(index=True,foreign_key="user.id")
+    user: User = Relationship(back_populates="summary")
+
+
+class SummaryUpdate(SummaryBase):
+    user_id: Optional[int] = None

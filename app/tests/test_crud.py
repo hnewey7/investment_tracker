@@ -10,7 +10,7 @@ import pytest
 
 from sqlmodel import Session, select
 
-from app.models import UserCreate, User, Instrument, OrderCreate, OrderUpdate, InstrumentBase
+from app.models import UserCreate, User, Instrument, OrderCreate, OrderUpdate, InstrumentBase, SummaryUpdate
 from app import crud
 from app.tests.utils.utils import random_email, random_lower_string
 from app.core.security import verify_password
@@ -712,3 +712,87 @@ def test_delete_order(db: Session, user: User, instrument: Instrument):
     # Delete order.
     crud.delete_order(session=db, order=test_order)
     assert not crud.get_order_by_id(session=db, order_id=test_order.id)
+
+# - - - - - - - - - - - - - - - - - - -
+# SUMMARY TESTS
+
+def test_create_summary(db: Session, user: User):
+    """
+    Test create summary.
+
+    Args:
+        db (Session): SQL session.
+        user (User): Test user.
+    """
+    summary = crud.create_summary(session=db, user=user)
+    assert summary.user_id == user.id
+    assert summary.user == user
+
+    # Get user.
+    user = crud.get_user_by_id(session=db,id=user.id)
+    assert user.summary == summary
+
+
+def test_get_summary_by_id(db: Session, user: User):
+    """
+    Test get summary by id.
+
+    Args:
+        db (Session): SQL session.
+        user (User): Test user.
+    """
+    summary = crud.create_summary(session=db, user=user)
+    db_obj = crud.get_summary_by_id(session=db, summary_id=summary.id)
+    assert db_obj == summary
+
+
+def test_get_summary_by_user_id(db: Session, user: User):
+    """
+    Test get summary by user id.
+
+    Args:
+        db (Session): SQL session.
+        user (User): Test user.
+    """
+    summary = crud.create_summary(session=db, user=user)
+    db_obj = crud.get_summary_by_user_id(session=db, user_id=user.id)
+    assert db_obj == summary
+
+
+@pytest.mark.parametrize("multiple_users", [2], indirect=True)
+def test_update_summary(db: Session, multiple_users: list[User]):
+    """
+    Test update summary.
+
+    Args:
+        db (Session): SQL session.
+        multiple_users (list[User]): Test multiple users. 
+    """
+    summary = crud.create_summary(session=db, user=multiple_users[0])
+    update_summary = SummaryUpdate(
+        ending_market_value=1,
+        beginning_market_value=1,
+        profit_loss=0,
+        user_id=2
+    )
+
+    updated_summary = crud.update_summary(session=db, summary=summary, summary_update=update_summary)
+    assert updated_summary.user == multiple_users[1]
+    assert updated_summary.ending_market_value == 1
+    assert updated_summary.beginning_market_value == 1
+    assert updated_summary.profit_loss == 0
+
+
+def test_delete_summary(db: Session, user: User):
+    """
+    Test deleting summary.
+
+    Args:
+        db (Session): SQL session.
+        user (User): Test user.
+    """
+    summary = crud.create_summary(session=db, user=user)
+    assert user.summary == summary
+
+    crud.delete_summary(session=db,summary=summary)
+    assert user.summary == None
