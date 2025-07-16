@@ -6,11 +6,12 @@ Created on 29-06-2025
 
 '''
 import pytest
+from datetime import datetime
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from app.models import User
+from app.models import User, Instrument, OrderCreate, Summary
 from app.tests.utils.utils import random_email, random_lower_string
 from app import crud
 
@@ -107,12 +108,13 @@ def test_get_multiple_users(client: TestClient, multiple_users: list[User]):
 # - - - - - - - - - - - - - - - - - - -
 # CREATE /USERS TESTS
 
-def test_create_user(client: TestClient):
+def test_create_user(client: TestClient, db: Session):
     """
     Test creating user endpoint.
 
     Args:
         client (TestClient): TestClient.
+        db (Session): SQL session.
     """
     # User properties.
     user_properties = {
@@ -133,6 +135,10 @@ def test_create_user(client: TestClient):
     # Check properties.
     assert user_response["username"] == user_properties["username"]
     assert user_response["email"] == user_properties["email"]
+
+    # Check summary.
+    summary = crud.get_summary_by_user_id(session=db,user_id=user_response["id"])
+    assert summary.user_id == user_response["id"]
 
 
 def test_create_existing_user(client: TestClient, user: User):
@@ -260,13 +266,15 @@ def test_update_username_and_password(client: TestClient, db: Session, user: Use
 # - - - - - - - - - - - - - - - - - - -
 # DELETE /USERS/{USER_ID} TESTS 
 
-def test_delete_user(client: TestClient, user: User):
+def test_delete_user(client: TestClient, db: Session, user: User, summary: Summary):
     """
     Test deleting user.
 
     Args:
         client (TestClient): Test client.
+        db (Session): SQL session.
         user (User): Test user.
+        summary (Summary): Test summary.
     """
     # Delete user.
     response = client.delete(f"/users/{user.id}")
@@ -279,3 +287,43 @@ def test_delete_user(client: TestClient, user: User):
     # Delete again for invalid.
     response = client.delete(f"/users/{user.id}")
     assert response.status_code == 400
+
+    # Check summary was deleted.
+    summary = crud.get_summary_by_user_id(session=db, user_id=user.id)
+    assert summary == None
+
+
+def test_delete_user_with_orders(client: TestClient, db: Session, user: User, summary: Summary, instrument: Instrument):
+    """
+    Test deleting user with orders and ensuring orders are deleted.
+
+    Args:
+        client (TestClient): Test client.
+        db (Session): SQL session.
+        user (User): Test user.
+        summary (Summary): Test summary.
+        instrument (Instrument): Test instrument.
+    """
+    # Order properties.
+    order_properties = {
+        "volume": 1,
+        "price": 1,
+        "type": "BUY",
+        "instrument_id": instrument.id
+    }
+
+    # Create orders.
+    order_create = OrderCreate(date=datetime.strptime("06/07/2025","%d/%m/%Y"),**order_properties)
+    order = crud.create_order(session=db,user_id=user.id,order_create=order_create)
+
+    # Delete user.
+    response = client.delete(f"/users/{user.id}")
+    delete_response = response.json()
+    assert response.status_code == 200
+    assert delete_response["username"] == user.username
+    assert delete_response["email"] == user.email
+    assert delete_response["id"] == user.id
+
+    # Check orders were deleted.
+    check_order = crud.get_order_by_id(session=db,order_id=order.id)
+    assert check_order == None

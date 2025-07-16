@@ -15,7 +15,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.core.db import engine, create_db_and_tables, clear_db
 from app.core.config import test_settings
-from app.models import User, UserCreate, Instrument, InstrumentBase
+from app.models import User, UserCreate, Instrument, InstrumentBase, Summary
 from app.tests.utils.utils import random_email, random_lower_string
 from app import crud
 
@@ -49,6 +49,16 @@ def user() -> Generator[User, None, None]:
         user_create = UserCreate(**properties)
         user = crud.create_user(session=session,user_create=user_create)
     yield user
+
+
+@pytest.fixture(scope="function")
+def summary() -> Generator[Summary, None, None]:
+    with Session(engine) as session:
+        # Get user.
+        user = crud.get_user_by_id(session=session,id=1)
+        # Create summary.
+        summary = crud.create_summary(session=session,user=user)
+    yield summary
 
 
 @pytest.fixture

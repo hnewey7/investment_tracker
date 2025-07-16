@@ -76,6 +76,10 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> User:
         )
 
     user = crud.create_user(session=session, user_create=user_in)
+
+    # Create summary for user.
+    crud.create_summary(session=session, user=user)
+
     return user
 
 # - - - - - - - - - - - - - - - - - - -
@@ -154,6 +158,14 @@ def delete_user(*, session: SessionDep, user_id: int):
             detail="Unable to find user with id."
         )
     
+    # Delete any orders.
+    for order in user.orders:
+        crud.delete_order(session=session, order=order)
+
+    # Delete corresponding summary.
+    summary = crud.get_summary_by_user_id(session=session,user_id=user_id)
+    crud.delete_summary(session=session,summary=summary)
+
     crud.delete_user(session=session,user=user)
     return user
 
