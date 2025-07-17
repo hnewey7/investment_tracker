@@ -13,12 +13,13 @@ from sqlmodel import select, func
 from app import crud
 from app.models import UserCreate, UserPublic, User, UsersPublic, UserUpdate
 from app.api.deps import SessionDep
-from app.api.routes import orders
+from app.api.routes import orders, summary
 
 # - - - - - - - - - - - - - - - - - - -
 
 router = APIRouter(prefix="/users",tags=["users"])
 router.include_router(orders.router, prefix="/{user_id}/orders", tags=["orders"])
+router.include_router(summary.router, prefix="/{user_id}/summary", tags=["summary"])
 
 # - - - - - - - - - - - - - - - - - - -
 # /USERS ENDPOINT
